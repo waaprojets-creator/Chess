@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import type { MoveRecord } from '@/types/chess';
 import { CLASSIFICATION_META } from '@/constants/classification';
 
@@ -71,10 +71,12 @@ interface MoveBtnProps {
   index: number;
   isActive: boolean;
   onClick?: (i: number) => void;
-  ref?: React.Ref<HTMLButtonElement>;
 }
 
-function MoveButton({ move, index, isActive, onClick, ref }: MoveBtnProps) {
+const MoveButton = forwardRef<HTMLButtonElement, MoveBtnProps>(function MoveButton(
+  { move, index, isActive, onClick },
+  ref
+) {
   const meta = move.classification ? CLASSIFICATION_META[move.classification] : null;
 
   return (
@@ -100,4 +102,4 @@ function MoveButton({ move, index, isActive, onClick, ref }: MoveBtnProps) {
       )}
     </button>
   );
-}
+});

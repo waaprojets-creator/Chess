@@ -13,11 +13,10 @@ const PIECE_UNICODE: Record<string, string> = {
 
 export function PlayerCard({ name, elo, isBot = false, isActive = false, capturedPieces = [] }: PlayerCardProps) {
   return (
-    <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${
-      isActive ? 'bg-chess-surface' : ''
-    }`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold
-        ${isBot ? 'bg-chess-accent text-white' : 'bg-chess-surface-alt text-chess-text-primary'}`}
+    <div className="flex items-center gap-2.5 py-0.5">
+      <div className={`flex h-9 w-9 items-center justify-center rounded-full text-lg font-bold ring-2 transition-all duration-200
+        ${isActive ? 'ring-chess-accent-light' : 'ring-transparent'}
+        ${isBot ? 'bg-accent-gradient text-white' : 'bg-chess-surface-alt text-chess-text-primary'}`}
       >
         {isBot ? '🤖' : name[0]?.toUpperCase() ?? '?'}
       </div>

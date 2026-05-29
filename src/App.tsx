@@ -10,8 +10,8 @@ import NavBar from '@/components/ui/NavBar';
 export default function App() {
   return (
     <HashRouter>
-      <div className="flex flex-col min-h-dvh bg-chess-bg text-chess-text-primary">
-        <div className="flex-1 pb-16">
+      <div className="flex flex-col min-h-dvh app-bg text-chess-text-primary">
+        <div className="flex-1 nav-pad">
           <Routes>
             <Route path="/" element={<HomeScreen />} />
             <Route path="/play" element={<PlaySetupScreen />} />

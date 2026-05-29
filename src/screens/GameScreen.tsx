@@ -239,13 +239,13 @@ export default function GameScreen() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-chess-bg overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#161513] pb-[calc(4rem+env(safe-area-inset-bottom))]">
       {/* Sidebar layout on desktop, stacked on mobile */}
       <div className="flex flex-1 overflow-hidden">
         {/* Board area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-2 gap-1">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2.5 p-3">
           {/* Opponent info */}
-          <div className="w-full max-w-md flex items-center justify-between px-1">
+          <div className="flex w-full max-w-[440px] items-center justify-between rounded-2xl border border-chess-border/50 bg-surface-gradient px-3 py-1.5">
             <PlayerCard
               name={`Bot ${store.botElo}`}
               elo={store.botElo}
@@ -278,7 +278,7 @@ export default function GameScreen() {
           </div>
 
           {/* Player info */}
-          <div className="w-full max-w-md flex items-center justify-between px-1">
+          <div className="flex w-full max-w-[440px] items-center justify-between rounded-2xl border border-chess-border/50 bg-surface-gradient px-3 py-1.5">
             <PlayerCard
               name="Vous"
               elo={1200}
@@ -292,7 +292,7 @@ export default function GameScreen() {
         </div>
 
         {/* Side panel — hidden on very small screens, shown on md+ */}
-        <div className="hidden md:flex flex-col w-56 bg-chess-surface border-l border-chess-border p-2 gap-2">
+        <div className="hidden md:flex flex-col w-60 bg-chess-surface/60 border-l border-chess-border p-3 gap-3">
           <MoveList moves={store.moves} />
           <GameControls
             phase={store.phase}
@@ -308,7 +308,7 @@ export default function GameScreen() {
       </div>
 
       {/* Mobile move list bar */}
-      <div className="md:hidden h-12 bg-chess-surface border-t border-chess-border flex items-center gap-2 px-2">
+      <div className="md:hidden h-12 glass border-t border-chess-border flex items-center gap-2 px-3">
         <MoveList moves={store.moves} compact />
         <GameControls
           phase={store.phase}

@@ -30,36 +30,42 @@ export default function PlaySetupScreen() {
   }
 
   return (
-    <div className="screen-enter p-4 space-y-6 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-chess-text-primary pt-2">Nouvelle partie</h1>
+    <div className="screen-enter mx-auto max-w-lg space-y-7 px-4 pt-safe">
+      <h1 className="pt-6 text-2xl font-black tracking-tight text-chess-text-primary">Nouvelle partie</h1>
 
       {/* Color selection */}
-      <div className="space-y-2">
-        <label className="text-sm text-chess-text-secondary font-medium">Couleur</label>
-        <div className="grid grid-cols-3 gap-2">
-          {(['white', 'random', 'black'] as const).map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c as unknown as PieceColor)}
-              className={`py-3 rounded-lg border transition-colors text-sm font-medium
-                ${color === (c as unknown as PieceColor)
-                  ? 'border-chess-accent bg-chess-accent/10 text-chess-accent'
-                  : 'border-chess-border bg-chess-surface text-chess-text-secondary hover:border-chess-accent/50'}
-              `}
-            >
-              {c === 'white' ? '♔ Blanc' : c === 'black' ? '♚ Noir' : '🎲 Aléat.'}
-            </button>
-          ))}
+      <section className="space-y-2.5">
+        <label className="text-sm font-semibold text-chess-text-secondary">Couleur</label>
+        <div className="grid grid-cols-3 gap-2.5">
+          {(['white', 'random', 'black'] as const).map((c) => {
+            const selected = color === (c as unknown as PieceColor);
+            return (
+              <button
+                key={c}
+                onClick={() => setColor(c as unknown as PieceColor)}
+                className={`flex flex-col items-center gap-1 rounded-2xl border py-3.5 text-sm font-semibold transition-all duration-150 active:scale-[0.97]
+                  ${selected
+                    ? 'border-chess-accent bg-chess-accent/15 text-chess-accent-light shadow-glow'
+                    : 'border-chess-border bg-surface-gradient text-chess-text-secondary hover:border-chess-accent/50'}
+                `}
+              >
+                <span className="text-2xl leading-none">
+                  {c === 'white' ? '♔' : c === 'black' ? '♚' : '🎲'}
+                </span>
+                {c === 'white' ? 'Blanc' : c === 'black' ? 'Noir' : 'Aléat.'}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
       {/* ELO Slider */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <label className="text-sm text-chess-text-secondary font-medium">Niveau bot</label>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-semibold text-chess-text-secondary">Niveau du bot</label>
           <div className="flex items-center gap-2">
-            <span className="text-chess-text-primary font-bold text-lg">{elo}</span>
-            <span className="text-xs text-chess-text-muted bg-chess-surface-alt px-2 py-0.5 rounded">
+            <span className="text-2xl font-black text-chess-text-primary">{elo}</span>
+            <span className="rounded-full bg-chess-accent/15 px-2.5 py-0.5 text-xs font-semibold text-chess-accent-light">
               {nearestProfile.label}
             </span>
           </div>
@@ -71,7 +77,7 @@ export default function PlaySetupScreen() {
           step={50}
           value={elo}
           onChange={(e) => setElo(parseInt(e.target.value))}
-          className="w-full accent-chess-accent cursor-pointer"
+          className="range-accent w-full cursor-pointer"
         />
         <div className="flex justify-between text-xs text-chess-text-muted">
           <span>400</span>
@@ -79,27 +85,36 @@ export default function PlaySetupScreen() {
           <span>2000</span>
           <span>3000</span>
         </div>
-      </div>
+      </section>
 
       {/* Time control */}
-      <div className="space-y-2">
-        <label className="text-sm text-chess-text-secondary font-medium">Cadence</label>
-        <div className="grid grid-cols-2 gap-2">
-          {TIME_CONTROLS.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => setTc(t)}
-              className={`py-2 px-3 rounded-lg border transition-colors text-sm text-left
-                ${tc.label === t.label
-                  ? 'border-chess-accent bg-chess-accent/10 text-chess-accent'
-                  : 'border-chess-border bg-chess-surface text-chess-text-secondary hover:border-chess-accent/50'}
-              `}
-            >
-              {t.label}
-            </button>
-          ))}
+      <section className="space-y-2.5">
+        <label className="text-sm font-semibold text-chess-text-secondary">Cadence</label>
+        <div className="grid grid-cols-2 gap-2.5">
+          {TIME_CONTROLS.map((t) => {
+            const selected = tc.label === t.label;
+            const [cat, ...rest] = t.label.split(' ');
+            return (
+              <button
+                key={t.label}
+                onClick={() => setTc(t)}
+                className={`flex items-center justify-between rounded-2xl border px-3.5 py-3 text-left transition-all duration-150 active:scale-[0.98]
+                  ${selected
+                    ? 'border-chess-accent bg-chess-accent/15 shadow-glow'
+                    : 'border-chess-border bg-surface-gradient hover:border-chess-accent/50'}
+                `}
+              >
+                <span className={`text-xs font-medium ${selected ? 'text-chess-accent-light' : 'text-chess-text-muted'}`}>
+                  {cat}
+                </span>
+                <span className={`text-sm font-bold ${selected ? 'text-chess-accent-light' : 'text-chess-text-primary'}`}>
+                  {rest.join(' ')}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
       <Button fullWidth size="lg" onClick={handleStart}>
         Lancer la partie

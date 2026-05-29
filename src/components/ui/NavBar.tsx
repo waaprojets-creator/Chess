@@ -1,29 +1,39 @@
 import { NavLink } from 'react-router-dom';
 
 const NAV = [
-  { to: '/',        icon: '⊞', label: 'Accueil'  },
-  { to: '/play',    icon: '♟',  label: 'Jouer'    },
+  { to: '/',        icon: '♞', label: 'Accueil'  },
+  { to: '/play',    icon: '♟', label: 'Jouer'    },
   { to: '/puzzles', icon: '⚡', label: 'Puzzles'  },
-  { to: '/history', icon: '📋', label: 'Parties'  },
+  { to: '/history', icon: '🗂', label: 'Parties'  },
 ];
 
 export default function NavBar() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-chess-surface border-t border-chess-border flex items-stretch z-40">
+    <nav className="fixed bottom-0 left-0 right-0 nav-h pb-safe glass border-t border-chess-border/70 flex items-stretch z-40">
       {NAV.map(({ to, icon, label }) => (
         <NavLink
           key={to}
           to={to}
           end={to === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors duration-150 ` +
+            `relative flex-1 flex flex-col items-center justify-center gap-1 transition-colors duration-150 ` +
             (isActive
-              ? 'text-chess-accent'
+              ? 'text-chess-accent-light'
               : 'text-chess-text-muted hover:text-chess-text-secondary')
           }
         >
-          <span className="text-xl leading-none">{icon}</span>
-          <span className="text-[10px] font-medium">{label}</span>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`flex items-center justify-center w-11 h-7 rounded-full text-lg leading-none transition-all duration-200 ${
+                  isActive ? 'bg-chess-accent/15' : ''
+                }`}
+              >
+                {icon}
+              </span>
+              <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

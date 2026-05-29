@@ -54,11 +54,11 @@ export default function PuzzlesScreen() {
   const boardFlipped = playerColorFromFen === 'b';
 
   return (
-    <div className="screen-enter p-4 space-y-4 max-w-lg mx-auto">
-      <div className="flex items-center justify-between pt-2">
+    <div className="screen-enter mx-auto max-w-lg space-y-4 px-4 pt-safe">
+      <div className="flex items-center justify-between pt-5">
         <div>
-          <h1 className="text-xl font-bold text-chess-text-primary">Puzzles</h1>
-          <p className="text-xs text-chess-text-muted mt-0.5">
+          <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">Puzzles</h1>
+          <p className="mt-0.5 text-xs text-chess-text-muted">
             {puzzle.themes.slice(0, 2).join(' · ')} · {puzzle.rating} ELO
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function PuzzlesScreen() {
 
       {/* Board */}
       <div
-        className={`rounded-lg overflow-hidden transition-all duration-200 ${
+        className={`board-glow overflow-hidden rounded-xl transition-all duration-200 ${
           feedback === 'correct' ? 'ring-2 ring-chess-accent' :
           feedback === 'wrong' ? 'ring-2 ring-chess-blunder' : ''
         }`}

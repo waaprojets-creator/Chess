@@ -19,11 +19,11 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative z-10 bg-chess-surface border border-chess-border rounded-xl shadow-chess-lg w-full max-w-sm p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-sm rounded-3xl border border-chess-border bg-surface-gradient p-6 shadow-chess-lg animate-scale-in">
         {title && (
-          <h2 className="text-lg font-semibold text-chess-text-primary mb-4">{title}</h2>
+          <h2 className="mb-4 text-xl font-bold text-chess-text-primary">{title}</h2>
         )}
         {children}
       </div>

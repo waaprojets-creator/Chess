@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { loadGames, deleteGame } from '@/services/gameStorageService';
 import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 import type { SavedGame } from '@/types/chess';
 
 export default function HistoryScreen() {
@@ -15,29 +16,24 @@ export default function HistoryScreen() {
 
   if (games.length === 0) {
     return (
-      <div className="screen-enter p-4 max-w-lg mx-auto">
-        <h1 className="text-xl font-bold text-chess-text-primary pt-2 mb-6">Parties</h1>
-        <div className="flex flex-col items-center justify-center h-48 gap-3 text-chess-text-muted">
-          <span className="text-4xl">♟</span>
-          <p className="text-sm">Aucune partie enregistrée</p>
-          <button
-            onClick={() => navigate('/play')}
-            className="text-chess-accent text-sm hover:underline"
-          >
-            Jouer une partie
-          </button>
+      <div className="screen-enter mx-auto max-w-lg px-4 pt-safe">
+        <h1 className="pt-6 text-2xl font-black tracking-tight text-chess-text-primary">Parties</h1>
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-chess-border bg-chess-surface/40 px-6 py-14 text-center text-chess-text-muted">
+          <span className="text-5xl">♟</span>
+          <p className="text-sm font-medium">Aucune partie enregistrée</p>
+          <Button onClick={() => navigate('/play')}>Jouer une partie</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="screen-enter p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-chess-text-primary pt-2 mb-4">
-        Parties <span className="text-chess-text-muted text-base font-normal">({games.length})</span>
+    <div className="screen-enter mx-auto max-w-lg px-4 pt-safe">
+      <h1 className="pt-6 pb-4 text-2xl font-black tracking-tight text-chess-text-primary">
+        Parties <span className="text-base font-semibold text-chess-text-muted">({games.length})</span>
       </h1>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {games.map((g) => {
           const playerWon =
             (g.result === 'white' && g.playerColor === 'w') ||
@@ -58,10 +54,10 @@ export default function HistoryScreen() {
             <div
               key={g.id}
               onClick={() => navigate(`/analysis?gameId=${g.id}`)}
-              className="bg-chess-surface rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-chess-surface-alt transition-colors"
+              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-chess-border/60 bg-surface-gradient p-3 shadow-card transition-all hover:border-chess-accent/40 active:scale-[0.99]"
             >
               {/* Result pill */}
-              <div className={`shrink-0 ${resultBg} rounded-lg px-2 py-1 text-center min-w-[60px]`}>
+              <div className={`shrink-0 ${resultBg} rounded-xl px-2.5 py-1.5 text-center min-w-[64px]`}>
                 <div className={`text-sm font-bold ${resultColor}`}>{resultLabel}</div>
               </div>
 

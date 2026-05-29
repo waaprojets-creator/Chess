@@ -58,10 +58,27 @@ export default function AnalysisScreen() {
     return counts;
   })();
 
+  // No game requested → friendly empty state instead of a blank scaffold.
+  // (An invalid gameId is redirected to /history by the effect above.)
+  if (!gameId) {
+    return (
+      <div className="screen-enter mx-auto flex max-w-lg flex-col items-center justify-center px-6 py-24 text-center">
+        <div className="text-5xl">🔍</div>
+        <h1 className="mt-4 text-lg font-bold text-chess-text-primary">Aucune partie à analyser</h1>
+        <p className="mt-1.5 text-sm text-chess-text-muted">
+          Choisissez une partie terminée pour la revoir coup par coup avec Stockfish.
+        </p>
+        <Button className="mt-6" onClick={() => navigate('/history')}>
+          Voir mes parties
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="screen-enter p-4 space-y-4 max-w-lg mx-auto">
-      <div className="flex items-center justify-between pt-2">
-        <h1 className="text-xl font-bold text-chess-text-primary">Analyse</h1>
+    <div className="screen-enter mx-auto max-w-lg space-y-4 px-4 pt-safe">
+      <div className="flex items-center justify-between pt-5">
+        <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">Analyse</h1>
         {!store.game?.analyzed && !store.isAnalyzing && store.game && (
           <Button size="sm" onClick={() => store.startAnalysis()}>
             Analyser avec Stockfish
@@ -96,25 +113,25 @@ export default function AnalysisScreen() {
       <div className="flex items-center justify-center gap-3">
         <button
           onClick={() => store.goToMove(-1)}
-          className="w-9 h-9 rounded-lg bg-chess-surface hover:bg-chess-surface-alt flex items-center justify-center text-chess-text-secondary"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏮
         </button>
         <button
           onClick={store.prevMove}
-          className="w-9 h-9 rounded-lg bg-chess-surface hover:bg-chess-surface-alt flex items-center justify-center text-chess-text-secondary"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ◀
         </button>
         <button
           onClick={store.nextMove}
-          className="w-9 h-9 rounded-lg bg-chess-surface hover:bg-chess-surface-alt flex items-center justify-center text-chess-text-secondary"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ▶
         </button>
         <button
           onClick={() => store.goToMove(store.moves.length - 1)}
-          className="w-9 h-9 rounded-lg bg-chess-surface hover:bg-chess-surface-alt flex items-center justify-center text-chess-text-secondary"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏭
         </button>

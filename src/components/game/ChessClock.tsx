@@ -22,10 +22,10 @@ export function ChessClock({ timeMs, isActive }: ChessClockProps) {
   return (
     <div
       className={`
-        font-mono text-xl font-bold px-3 py-1 rounded-lg min-w-[5rem] text-center
+        font-mono text-xl font-bold px-3.5 py-1.5 rounded-xl min-w-[5rem] text-center
         transition-colors duration-300
         ${isActive
-          ? 'bg-chess-text-primary text-chess-bg'
+          ? 'bg-chess-text-primary text-chess-bg shadow-md'
           : 'bg-chess-surface-alt text-chess-text-secondary'}
         ${isLow && isActive ? 'clock-low text-chess-clock-low bg-chess-surface-alt' : ''}
         ${isWarning && !isLow && isActive ? 'text-chess-clock-warning' : ''}
