@@ -3,9 +3,11 @@ import { usePuzzleStore } from '@/store/puzzleStore';
 import { ChessBoard } from '@/components/board/ChessBoard';
 import { PuzzleRating } from '@/components/puzzles/PuzzleRating';
 import { Button } from '@/components/ui/Button';
+import { useSounds } from '@/hooks/useSounds';
 
 export default function PuzzlesScreen() {
   const store = usePuzzleStore();
+  const { play } = useSounds();
   const [boardWidth, setBoardWidth] = useState(360);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
@@ -28,11 +30,19 @@ export default function PuzzlesScreen() {
     const result = store.submitMove(uci);
 
     if (result === 'wrong') {
+      play('capture');
       setFeedback('wrong');
       setTimeout(() => setFeedback(null), 800);
       return false;
     }
-    if (result === 'correct_step' || result === 'solved') {
+    if (result === 'correct_step') {
+      play('move');
+      setFeedback('correct');
+      setTimeout(() => setFeedback(null), 400);
+      return true;
+    }
+    if (result === 'solved') {
+      play('end');
       setFeedback('correct');
       setTimeout(() => setFeedback(null), 400);
       return true;

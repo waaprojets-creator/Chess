@@ -31,7 +31,7 @@ export function classifyMove(
 ): MoveClassification {
   const cpLoss = cpBefore - cpAfter;
 
-  if (isBrilliant && playedUci === bestUci) return 'brilliant';
+  if (isBrilliant && playedUci !== bestUci) return 'brilliant';
   if (playedUci === bestUci) return cpLoss <= 0 ? 'best' : 'great';
   if (cpLoss <= 0) return 'great';
   if (cpLoss <= CLASSIFICATION_THRESHOLDS.good) return 'good';

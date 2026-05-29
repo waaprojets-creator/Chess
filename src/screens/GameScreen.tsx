@@ -14,6 +14,8 @@ import { GameControls } from '@/components/game/GameControls';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useChessClock } from '@/hooks/useChessClock';
+import { useSounds } from '@/hooks/useSounds';
+import { SettingsModal } from '@/components/ui/SettingsModal';
 import type { MoveRecord, SavedGame } from '@/types/chess';
 
 export default function GameScreen() {
@@ -22,6 +24,8 @@ export default function GameScreen() {
   const isThinkingRef = useRef(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [boardWidth, setBoardWidth] = useState(360);
+  const { play } = useSounds();
+  const [showSettings, setShowSettings] = useState(false);
 
   useChessClock();
 
@@ -97,12 +101,19 @@ export default function GameScreen() {
       };
       store.addMoveRecord(record);
 
+      // Sound feedback
+      if (chess.inCheck()) play('check');
+      else if (lastMove.captured) play('capture');
+      else play('move');
+
       // Check game end
       if (chess.isCheckmate()) {
+        play('end');
         store.endGame(state.turn === 'w' ? 'black' : 'white', 'checkmate');
         return true;
       }
       if (chess.isDraw()) {
+        play('end');
         const reason = chess.isStalemate() ? 'stalemate'
           : chess.isInsufficientMaterial() ? 'insufficient_material'
           : 'fifty_moves';
@@ -114,7 +125,7 @@ export default function GameScreen() {
       triggerBotMove();
       return true;
     },
-    [store]
+    [store, play]
   );
 
   const triggerBotMove = useCallback(async () => {
@@ -175,16 +186,22 @@ export default function GameScreen() {
       };
       useGameStore.getState().addMoveRecord(botRecord);
 
+      if (chess2.inCheck()) play('check');
+      else if (botLastMove.captured) play('capture');
+      else play('move');
+
       if (chess2.isCheckmate()) {
+        play('end');
         useGameStore.getState().endGame(newState.turn === 'w' ? 'black' : 'white', 'checkmate');
       } else if (chess2.isDraw()) {
+        play('end');
         const reason = chess2.isStalemate() ? 'stalemate' : 'fifty_moves';
         useGameStore.getState().endGame('draw', reason);
       }
     } finally {
       isThinkingRef.current = false;
     }
-  }, []);
+  }, [play]);
 
   // Init stockfish when the game starts; if the bot is to move first
   // (player chose Black), kick off its opening move.
@@ -240,6 +257,7 @@ export default function GameScreen() {
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#161513] pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
       {/* Sidebar layout on desktop, stacked on mobile */}
       <div className="flex flex-1 overflow-hidden">
         {/* Board area */}
@@ -307,9 +325,16 @@ export default function GameScreen() {
         </div>
       </div>
 
-      {/* Mobile move list bar */}
-      <div className="md:hidden h-12 glass border-t border-chess-border flex items-center gap-2 px-3">
+      {/* Mobile move list bar — fixed height, horizontal scroll */}
+      <div className="md:hidden h-12 glass border-t border-chess-border flex items-center gap-2 px-2 shrink-0">
         <MoveList moves={store.moves} compact />
+        <button
+          onClick={() => setShowSettings(true)}
+          className="shrink-0 w-7 h-7 flex items-center justify-center rounded text-chess-text-muted hover:text-chess-text-primary"
+          title="Paramètres"
+        >
+          ⚙
+        </button>
         <GameControls
           phase={store.phase}
           onResign={store.resign}

@@ -81,6 +81,7 @@ export interface SavedGame {
   startedAt: number;
   endedAt: number | null;
   analyzed: boolean;
+  accuracy?: { white: number; black: number };
 }
 
 export interface PuzzleEntry {

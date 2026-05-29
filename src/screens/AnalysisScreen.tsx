@@ -8,6 +8,7 @@ import { MoveList } from '@/components/game/MoveList';
 import { AdvantageGraph } from '@/components/analysis/AdvantageGraph';
 import { BestMoveSuggestion } from '@/components/analysis/BestMoveSuggestion';
 import { MoveClassBadge } from '@/components/analysis/MoveClassBadge';
+import { PgnImportModal } from '@/components/analysis/PgnImportModal';
 import { Button } from '@/components/ui/Button';
 import { CLASSIFICATION_META } from '@/constants/classification';
 
@@ -17,6 +18,7 @@ export default function AnalysisScreen() {
   const gameId = params.get('gameId');
   const store = useAnalysisStore();
   const [boardWidth, setBoardWidth] = useState(360);
+  const [showImport, setShowImport] = useState(false);
 
   useEffect(() => {
     function measure() {
@@ -77,19 +79,34 @@ export default function AnalysisScreen() {
 
   return (
     <div className="screen-enter mx-auto max-w-lg space-y-4 px-4 pt-safe">
+      <PgnImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        onImported={(id) => {
+          setShowImport(false);
+          if (id) navigate(`/analysis?gameId=${id}`);
+          else navigate('/history');
+        }}
+      />
+
       <div className="flex items-center justify-between pt-5">
         <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">Analyse</h1>
-        {!store.game?.analyzed && !store.isAnalyzing && store.game && (
-          <Button size="sm" onClick={() => store.startAnalysis()}>
-            Analyser avec Stockfish
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="ghost" onClick={() => setShowImport(true)}>
+            Importer
           </Button>
-        )}
-        {store.isAnalyzing && (
-          <div className="flex items-center gap-2 text-sm text-chess-text-secondary">
-            <div className="w-4 h-4 border-2 border-chess-accent border-t-transparent rounded-full animate-spin" />
-            {Math.round(store.analysisProgress * 100)}%
-          </div>
-        )}
+          {!store.game?.analyzed && !store.isAnalyzing && store.game && (
+            <Button size="sm" onClick={() => store.startAnalysis()}>
+              Analyser
+            </Button>
+          )}
+          {store.isAnalyzing && (
+            <div className="flex items-center gap-2 text-sm text-chess-text-secondary">
+              <div className="w-4 h-4 border-2 border-chess-accent border-t-transparent rounded-full animate-spin" />
+              {Math.round(store.analysisProgress * 100)}%
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Board + eval */}
@@ -161,9 +178,39 @@ export default function AnalysisScreen() {
         />
       </div>
 
-      {/* Summary badges */}
+      {/* Accuracy + Summary */}
       {store.game?.analyzed && Object.keys(summary).length > 0 && (
-        <div className="bg-chess-surface rounded-xl p-4 space-y-2">
+        <div className="bg-chess-surface rounded-xl p-4 space-y-3">
+          {/* Accuracy per player */}
+          {store.game.accuracy && (
+            <div className="flex gap-4 pb-3 border-b border-chess-border/40">
+              {[
+                { label: 'Blancs', value: store.game.accuracy.white, color: '#e8e6e3' },
+                { label: 'Noirs', value: store.game.accuracy.black, color: '#9ca3af' },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="relative w-14 h-14">
+                    <svg viewBox="0 0 40 40" className="w-full h-full -rotate-90">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+                      <circle
+                        cx="20" cy="20" r="16"
+                        fill="none"
+                        stroke={value >= 80 ? '#97b172' : value >= 60 ? '#f0c15c' : '#cc3232'}
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(value / 100) * 100.53} 100.53`}
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold" style={{ color }}>
+                      {value}%
+                    </span>
+                  </div>
+                  <span className="text-xs text-chess-text-muted">{label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="text-sm font-semibold text-chess-text-secondary">Résumé</div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(summary).map(([cls, count]) => {

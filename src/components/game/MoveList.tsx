@@ -13,8 +13,53 @@ export function MoveList({ moves, currentIndex = -1, onMoveClick, compact = fals
   const activeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    activeRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
   }, [currentIndex]);
+
+  if (compact) {
+    // Horizontal single-row scrollable list for the mobile bottom bar.
+    // Prevents the list from growing vertically and overlapping the board.
+    if (moves.length === 0) {
+      return (
+        <div className="flex-1 flex items-center text-chess-text-muted text-xs px-1 min-w-0">
+          Aucun coup
+        </div>
+      );
+    }
+    return (
+      <div className="flex-1 flex items-center gap-0.5 overflow-x-auto text-xs min-w-0 py-0.5 scrollbar-hide">
+        {moves.map((move, idx) => {
+          const isActive = currentIndex === idx;
+          const meta = move.classification ? CLASSIFICATION_META[move.classification] : null;
+          return (
+            <button
+              key={idx}
+              ref={isActive ? activeRef : undefined}
+              onClick={() => onMoveClick?.(idx)}
+              className={`
+                shrink-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded transition-colors
+                ${isActive
+                  ? 'bg-chess-accent text-white font-semibold'
+                  : 'text-chess-text-primary hover:bg-chess-surface-hover'}
+              `}
+            >
+              {move.color === 'w' && (
+                <span className={`${isActive ? 'text-white/70' : 'text-chess-text-muted'}`}>
+                  {move.moveNumber}.
+                </span>
+              )}
+              <span className="font-medium">{move.san}</span>
+              {meta?.symbol && (
+                <span className="font-bold" style={{ color: isActive ? 'white' : meta.color }}>
+                  {meta.symbol}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   const pairs: [MoveRecord, MoveRecord | null][] = [];
   for (let i = 0; i < moves.length; i += 2) {
@@ -30,7 +75,7 @@ export function MoveList({ moves, currentIndex = -1, onMoveClick, compact = fals
   }
 
   return (
-    <div className={`move-list overflow-y-auto flex-1 ${compact ? 'text-xs' : 'text-sm'}`}>
+    <div className="move-list overflow-y-auto flex-1 text-sm">
       {pairs.map(([white, black], pairIdx) => {
         const wIdx = pairIdx * 2;
         const bIdx = pairIdx * 2 + 1;

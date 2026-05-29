@@ -2,11 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { loadGames, deleteGame } from '@/services/gameStorageService';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { PgnImportModal } from '@/components/analysis/PgnImportModal';
 import type { SavedGame } from '@/types/chess';
 
 export default function HistoryScreen() {
   const navigate = useNavigate();
   const [games, setGames] = useState<SavedGame[]>(() => loadGames());
+  const [showImport, setShowImport] = useState(false);
 
   function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation();
@@ -14,14 +16,24 @@ export default function HistoryScreen() {
     setGames(loadGames());
   }
 
+  function handleImported(gameId?: string) {
+    setShowImport(false);
+    setGames(loadGames());
+    if (gameId) navigate(`/analysis?gameId=${gameId}`);
+  }
+
   if (games.length === 0) {
     return (
       <div className="screen-enter mx-auto max-w-lg px-4 pt-safe">
+        <PgnImportModal open={showImport} onClose={() => setShowImport(false)} onImported={handleImported} />
         <h1 className="pt-6 text-2xl font-black tracking-tight text-chess-text-primary">Parties</h1>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-chess-border bg-chess-surface/40 px-6 py-14 text-center text-chess-text-muted">
           <span className="text-5xl">♟</span>
           <p className="text-sm font-medium">Aucune partie enregistrée</p>
-          <Button onClick={() => navigate('/play')}>Jouer une partie</Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/play')}>Jouer une partie</Button>
+            <Button variant="ghost" onClick={() => setShowImport(true)}>Importer</Button>
+          </div>
         </div>
       </div>
     );
@@ -29,9 +41,15 @@ export default function HistoryScreen() {
 
   return (
     <div className="screen-enter mx-auto max-w-lg px-4 pt-safe">
-      <h1 className="pt-6 pb-4 text-2xl font-black tracking-tight text-chess-text-primary">
-        Parties <span className="text-base font-semibold text-chess-text-muted">({games.length})</span>
-      </h1>
+      <PgnImportModal open={showImport} onClose={() => setShowImport(false)} onImported={handleImported} />
+      <div className="flex items-center justify-between pt-6 pb-4">
+        <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">
+          Parties <span className="text-base font-semibold text-chess-text-muted">({games.length})</span>
+        </h1>
+        <Button size="sm" variant="ghost" onClick={() => setShowImport(true)}>
+          Importer
+        </Button>
+      </div>
 
       <div className="space-y-2.5">
         {games.map((g) => {

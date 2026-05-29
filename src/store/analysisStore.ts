@@ -82,13 +82,13 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
       const sf = getStockfishService();
       await sf.waitReady();
 
-      const { moves, graphData } = await analyzeGame(
+      const { moves, graphData, accuracy } = await analyzeGame(
         game,
         sf,
         (idx, total) => set({ analysisProgress: idx / total })
       );
 
-      const updatedGame: SavedGame = { ...game, moves, analyzed: true };
+      const updatedGame: SavedGame = { ...game, moves, analyzed: true, accuracy };
       saveGame(updatedGame);
 
       set({

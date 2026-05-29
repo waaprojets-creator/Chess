@@ -16,7 +16,7 @@ export const PUZZLES: PuzzleEntry[] = [
   { id:"p013", fen:"rnb1k2r/ppp2ppp/5n2/3p4/1b1PP3/2N1BN2/PPP2PPP/R2QKB1R b KQkq - 1 6", moves:["b4c3","b2c3","d5e4","f3e5"], rating:1100, themes:["exchange"] },
   { id:"p014", fen:"4r1k1/pp3ppp/2p5/8/8/2P5/PP3PPP/4R1K1 w - - 0 1", moves:["e1e8","e8e8"], rating:800, themes:["rookEndgame","backRank"] },
   { id:"p015", fen:"r3k2r/pppbqppp/2np1n2/4p3/2B1P3/2NP1N2/PPP2PPP/R1BQK2R w KQkq - 0 7", moves:["e5e4","f3e5","d7e6","e5f7"], rating:1350, themes:["fork","royalFork"] },
-  { id:"p016", fen:"2rq1rk1/pp2bppp/2n1pn2/3p4/3P4/2PBP N2/PP3PPP/R1BQ1RK1 w - - 0 10", moves:["d3h7","g8h7","d1d5","h7g8","d5f7"], rating:1450, themes:["sacrifice","matePattern"] },
+  { id:"p016", fen:"2rq1rk1/pp2bppp/2n1pn2/3p4/3P4/2PBPN2/PP3PPP/R1BQ1RK1 w - - 0 10", moves:["d3h7","g8h7","d1d5","h7g8","d5f7"], rating:1450, themes:["sacrifice","matePattern"] },
   { id:"p017", fen:"6k1/pp4pp/2p5/8/4r3/8/PP4PP/6K1 b - - 0 1", moves:["g8h8","g1f2","e4e2","f2f3","e2f2"], rating:950, themes:["rookActivity"] },
   { id:"p018", fen:"r1b1k2r/pppp1ppp/2n2n2/2b1p1B1/2B1P3/3P1N2/PPP2PPP/RN1QK2R b KQkq - 5 6", moves:["c5f2","e1f2","f6e4","f2e3","e4d2"], rating:1300, themes:["sacrifice","fork"] },
   { id:"p019", fen:"rnbqk2r/ppp1bppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 5", moves:["d5d4","f3e5","d7d6","e5f7"], rating:1200, themes:["fork"] },
