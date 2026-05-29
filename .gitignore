@@ -1,5 +1,6 @@
 node_modules/
 dist/
+playwright-browsers/
 .env
 .env.local
 *.local
