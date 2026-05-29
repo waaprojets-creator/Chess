@@ -22,33 +22,20 @@ export default function GameScreen() {
   const isThinkingRef = useRef(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [boardWidth, setBoardWidth] = useState(360);
-  const boardContainerRef = useRef<HTMLDivElement>(null);
 
   useChessClock();
 
-  // Resize board to fit screen
+  // Resize board to fit the viewport (independent of the board itself, like
+  // PuzzlesScreen/AnalysisScreen — measuring the flex wrapper races the board
+  // and locks it tiny).
   useEffect(() => {
     function measure() {
-      if (boardContainerRef.current) {
-        const w = boardContainerRef.current.offsetWidth;
-        setBoardWidth(Math.min(w, 420));
-      }
+      setBoardWidth(Math.min(window.innerWidth - 32, 400));
     }
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
-
-  // Init stockfish when game starts
-  useEffect(() => {
-    if (store.phase !== 'playing') return;
-    const sf = getStockfishService();
-    sf.waitReady().then(() => {
-      const profile = getBotProfile(store.botElo);
-      sf.setBotProfile(profile);
-      sf.newGame();
-    });
-  }, [store.phase, store.botElo]);
 
   // Show end modal
   useEffect(() => {
@@ -61,13 +48,9 @@ export default function GameScreen() {
   const persistGame = useCallback(() => {
     const s = useGameStore.getState();
     if (!s.id || !s.endedAt) return;
-    const chess = new Chess();
-    s.moves.forEach((m) => {
-      try { chess.move({ from: m.uci.slice(0,2), to: m.uci.slice(2,4), promotion: m.uci[4] }); } catch {}
-    });
     const saved: SavedGame = {
       id: s.id,
-      pgn: chess.pgn(),
+      pgn: s.chess.pgn(),
       moves: s.moves,
       result: s.result,
       endReason: s.endReason,
@@ -92,12 +75,9 @@ export default function GameScreen() {
       const ok = store.makeMove(from, to, promotion);
       if (!ok) return false;
 
+      // makeMove already applied the move to the store's shared chess instance.
       const state = useGameStore.getState();
-      const chess = new Chess();
-      state.moves.forEach((m) => {
-        try { chess.move({ from: m.uci.slice(0,2), to: m.uci.slice(2,4), promotion: m.uci[4] }); } catch {}
-      });
-      // Reconstruct last move san
+      const chess = state.chess;
       const history = chess.history({ verbose: true });
       const lastMove = history[history.length - 1];
       if (!lastMove) return true;
@@ -112,7 +92,7 @@ export default function GameScreen() {
         bestMoveSan: null,
         bestMoveUci: null,
         timeTakenMs: 0,
-        moveNumber: Math.ceil(state.moves.length / 2),
+        moveNumber: Math.ceil(history.length / 2),
         color: lastMove.color,
       };
       store.addMoveRecord(record);
@@ -175,10 +155,7 @@ export default function GameScreen() {
       if (!ok) return;
 
       const newState = useGameStore.getState();
-      const chess2 = new Chess();
-      newState.moves.forEach((m) => {
-        try { chess2.move({ from: m.uci.slice(0,2), to: m.uci.slice(2,4), promotion: m.uci[4] }); } catch {}
-      });
+      const chess2 = newState.chess;
       const hist2 = chess2.history({ verbose: true });
       const botLastMove = hist2[hist2.length - 1];
       if (!botLastMove) return;
@@ -193,7 +170,7 @@ export default function GameScreen() {
         bestMoveSan: null,
         bestMoveUci: null,
         timeTakenMs: profile.movetime,
-        moveNumber: Math.ceil(newState.moves.length / 2),
+        moveNumber: Math.ceil(hist2.length / 2),
         color: botLastMove.color,
       };
       useGameStore.getState().addMoveRecord(botRecord);
@@ -208,6 +185,22 @@ export default function GameScreen() {
       isThinkingRef.current = false;
     }
   }, []);
+
+  // Init stockfish when the game starts; if the bot is to move first
+  // (player chose Black), kick off its opening move.
+  useEffect(() => {
+    if (store.phase !== 'playing') return;
+    const sf = getStockfishService();
+    sf.waitReady().then(() => {
+      const profile = getBotProfile(store.botElo);
+      sf.setBotProfile(profile);
+      sf.newGame();
+      const s = useGameStore.getState();
+      if (s.moves.length === 0 && s.turn !== s.playerColor) {
+        triggerBotMove();
+      }
+    });
+  }, [store.phase, store.botElo, triggerBotMove]);
 
   // Redirect if no game
   useEffect(() => {
@@ -266,7 +259,7 @@ export default function GameScreen() {
           </div>
 
           {/* Board + eval bar */}
-          <div className="flex items-center gap-1" ref={boardContainerRef}>
+          <div className="flex items-center gap-2">
             <EvalBar
               evalCp={store.liveEvalCp}
               evalMate={store.liveEvalMate}
@@ -280,7 +273,7 @@ export default function GameScreen() {
               interactive={store.phase === 'playing' && store.turn === store.playerColor}
               lastMoveSquares={lastMoveSquares}
               kingCheckSquare={kingCheckSquare}
-              width={boardWidth}
+              width={boardWidth - 28}
             />
           </div>
 

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 playwright-browsers/
+pw-check.mjs
 .env
 .env.local
 *.local

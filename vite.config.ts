@@ -4,7 +4,22 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
-  base: './',
+  // Project page served from https://<user>.github.io/Chess/
+  base: '/Chess/',
+  // COOP/COEP aren't required by the single-threaded NNUE build, but enabling
+  // them in dev/preview keeps parity with cross-origin-isolated environments.
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+  },
+  preview: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+  },
   plugins: [
     react(),
     VitePWA({
