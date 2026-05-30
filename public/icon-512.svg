@@ -3,7 +3,7 @@
     <clipPath id="clip"><rect width="512" height="512" rx="96"/></clipPath>
     <radialGradient id="vignette" cx="50%" cy="45%" r="58%">
       <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
-      <stop offset="100%" stop-color="rgba(0,0,0,0.5)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.33)"/>
     </radialGradient>
   </defs>
 
@@ -16,7 +16,7 @@
 
     <!-- Vignette + dark scrim -->
     <rect width="512" height="512" fill="url(#vignette)"/>
-    <rect width="512" height="512" fill="rgba(18,15,12,0.44)"/>
+    <rect width="512" height="512" fill="rgba(18,15,12,0.29)"/>
 
     <!--
       Étoile islamique à 8 branches — union de deux carrés superposés (l'un droit,
@@ -31,28 +31,28 @@
     -->
     <polygon
       points="
-        256,66
-        311.6,121.6
-        390.4,121.6
-        390.4,200.4
-        446,256
-        390.4,311.6
-        390.4,390.4
-        311.6,390.4
-        256,446
-        200.4,390.4
-        121.6,390.4
-        121.6,311.6
-        66,256
-        121.6,200.4
-        121.6,121.6
-        200.4,121.6
+        256,47
+        317.2,108.2
+        403.8,108.2
+        403.8,194.8
+        465,256
+        403.8,317.2
+        403.8,403.8
+        317.2,403.8
+        256,465
+        194.8,403.8
+        108.2,403.8
+        108.2,317.2
+        47,256
+        108.2,194.8
+        108.2,108.2
+        194.8,108.2
       "
-      fill="rgba(201,168,76,0.10)"
-      stroke="#c9a84c"
-      stroke-width="2.5"
+      fill="rgba(255,255,255,0.07)"
+      stroke="#ffffff"
+      stroke-width="4"
       stroke-linejoin="miter"
-      opacity="0.55"
+      opacity="0.60"
     />
 
     <!-- Arabic calligraphy : شطرنج — élément principal -->
