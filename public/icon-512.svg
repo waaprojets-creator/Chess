@@ -1,4 +1,30 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'>
-  <rect width='512' height='512' rx='76.8' fill='#262421'/>
-  <text x='256' y='394.24' font-size='332.8' text-anchor='middle' font-family='serif' fill='#769656'>♟</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="clip"><rect width="512" height="512" rx="96"/></clipPath>
+    <radialGradient id="vignette" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.45)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Chess board 2×2 full bleed -->
+  <g clip-path="url(#clip)">
+    <rect x="0"   y="0"   width="256" height="256" fill="#f0d9b5"/>
+    <rect x="256" y="0"   width="256" height="256" fill="#769656"/>
+    <rect x="0"   y="256" width="256" height="256" fill="#769656"/>
+    <rect x="256" y="256" width="256" height="256" fill="#f0d9b5"/>
+
+    <!-- Vignette + dark scrim for contrast -->
+    <rect width="512" height="512" fill="url(#vignette)"/>
+    <rect width="512" height="512" fill="rgba(18,15,12,0.42)"/>
+
+    <!-- Chess king centered in safe zone -->
+    <text x="256" y="358" font-size="310" text-anchor="middle"
+          font-family="Georgia,'Times New Roman',serif"
+          fill="#ffffff" opacity="0.97">&#9812;</text>
+  </g>
+
+  <!-- Subtle inner border -->
+  <rect width="512" height="512" rx="96" fill="none"
+        stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
 </svg>
