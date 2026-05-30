@@ -1,30 +1,59 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <clipPath id="clip"><rect width="512" height="512" rx="96"/></clipPath>
-    <radialGradient id="vignette" cx="50%" cy="45%" r="55%">
+    <radialGradient id="vignette" cx="50%" cy="45%" r="58%">
       <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
-      <stop offset="100%" stop-color="rgba(0,0,0,0.45)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.5)"/>
     </radialGradient>
   </defs>
 
-  <!-- Chess board 2×2 full bleed -->
   <g clip-path="url(#clip)">
+    <!-- Chess board 2×2 -->
     <rect x="0"   y="0"   width="256" height="256" fill="#f0d9b5"/>
     <rect x="256" y="0"   width="256" height="256" fill="#769656"/>
     <rect x="0"   y="256" width="256" height="256" fill="#769656"/>
     <rect x="256" y="256" width="256" height="256" fill="#f0d9b5"/>
 
-    <!-- Vignette + dark scrim for contrast -->
+    <!-- Vignette + dark scrim -->
     <rect width="512" height="512" fill="url(#vignette)"/>
-    <rect width="512" height="512" fill="rgba(18,15,12,0.42)"/>
+    <rect width="512" height="512" fill="rgba(18,15,12,0.44)"/>
 
-    <!-- Chess king centered in safe zone -->
-    <text x="256" y="358" font-size="310" text-anchor="middle"
+    <!-- Islamic 8-pointed star (Rub el Hizb style), gold, subtle -->
+    <polygon
+      points="256,66 286.6,182.1 390.4,121.6 329.9,225.4 446,256 329.9,286.6 390.4,390.4 286.6,329.9 256,446 225.4,329.9 121.6,390.4 182.1,286.6 66,256 182.1,225.4 121.6,121.6 225.4,182.1"
+      fill="none"
+      stroke="#c9a84c"
+      stroke-width="3"
+      opacity="0.35"
+    />
+    <!-- Inner star square decorations -->
+    <polygon
+      points="256,122 329.9,225.4 390.4,121.6 329.9,225.4 390.4,390.4 286.6,329.9 256,390 225.4,329.9 121.6,390.4 182.1,286.6 66,256 182.1,225.4 121.6,121.6 225.4,182.1 256,122"
+      fill="rgba(201,168,76,0.08)"
+      stroke="none"
+    />
+    <!-- Concentric inner octagon of star -->
+    <polygon
+      points="256,122 329.9,182.1 390.4,256 329.9,329.9 256,390 182.1,329.9 122,256 182.1,182.1"
+      fill="none"
+      stroke="#c9a84c"
+      stroke-width="2"
+      opacity="0.20"
+    />
+
+    <!-- Chess king, white, centered -->
+    <text x="256" y="348" font-size="290" text-anchor="middle"
           font-family="Georgia,'Times New Roman',serif"
-          fill="#ffffff" opacity="0.97">&#9812;</text>
+          fill="#ffffff" opacity="0.96">&#9812;</text>
+
+    <!-- Arabic calligraphy: شطرنج (shatranj = chess) -->
+    <text x="256" y="478" font-size="62" text-anchor="middle"
+          font-family="'Amiri','Scheherazade New','Traditional Arabic','Arabic Typesetting',serif"
+          fill="#c9a84c" opacity="0.88"
+          letter-spacing="2">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
   </g>
 
-  <!-- Subtle inner border -->
+  <!-- Subtle gold inner border -->
   <rect width="512" height="512" rx="96" fill="none"
-        stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+        stroke="rgba(201,168,76,0.18)" stroke-width="6"/>
 </svg>
