@@ -18,27 +18,41 @@
     <rect width="512" height="512" fill="url(#vignette)"/>
     <rect width="512" height="512" fill="rgba(18,15,12,0.44)"/>
 
-    <!-- Islamic 8-pointed star (Rub el Hizb style), gold, subtle -->
+    <!--
+      Étoile islamique à 8 branches — union de deux carrés superposés (l'un droit,
+      l'autre tourné 45°), circumrayon R=190, centrés en (256,256).
+
+      Carré 1 (losange) : sommets (256,66) (446,256) (256,446) (66,256)
+        côtés : x−y=190 | x+y=702 | x−y=−190 | x+y=322
+      Carré 2 (axe-aligné) : sommets (390.4,121.6) (390.4,390.4) (121.6,390.4) (121.6,121.6)
+        côtés : y=121.6 | x=390.4 | y=390.4 | x=121.6
+
+      16 sommets du polygone union (8 coins + 8 intersections) :
+    -->
     <polygon
-      points="256,66 286.6,182.1 390.4,121.6 329.9,225.4 446,256 329.9,286.6 390.4,390.4 286.6,329.9 256,446 225.4,329.9 121.6,390.4 182.1,286.6 66,256 182.1,225.4 121.6,121.6 225.4,182.1"
-      fill="none"
+      points="
+        256,66
+        311.6,121.6
+        390.4,121.6
+        390.4,200.4
+        446,256
+        390.4,311.6
+        390.4,390.4
+        311.6,390.4
+        256,446
+        200.4,390.4
+        121.6,390.4
+        121.6,311.6
+        66,256
+        121.6,200.4
+        121.6,121.6
+        200.4,121.6
+      "
+      fill="rgba(201,168,76,0.10)"
       stroke="#c9a84c"
-      stroke-width="3"
-      opacity="0.35"
-    />
-    <!-- Inner star square decorations -->
-    <polygon
-      points="256,122 329.9,225.4 390.4,121.6 329.9,225.4 390.4,390.4 286.6,329.9 256,390 225.4,329.9 121.6,390.4 182.1,286.6 66,256 182.1,225.4 121.6,121.6 225.4,182.1 256,122"
-      fill="rgba(201,168,76,0.08)"
-      stroke="none"
-    />
-    <!-- Concentric inner octagon of star -->
-    <polygon
-      points="256,122 329.9,182.1 390.4,256 329.9,329.9 256,390 182.1,329.9 122,256 182.1,182.1"
-      fill="none"
-      stroke="#c9a84c"
-      stroke-width="2"
-      opacity="0.20"
+      stroke-width="2.5"
+      stroke-linejoin="miter"
+      opacity="0.55"
     />
 
     <!-- Chess king, white, centered -->
@@ -46,14 +60,13 @@
           font-family="Georgia,'Times New Roman',serif"
           fill="#ffffff" opacity="0.96">&#9812;</text>
 
-    <!-- Arabic calligraphy: شطرنج (shatranj = chess) -->
+    <!-- Arabic calligraphy : شطرنج -->
     <text x="256" y="478" font-size="62" text-anchor="middle"
           font-family="'Amiri','Scheherazade New','Traditional Arabic','Arabic Typesetting',serif"
-          fill="#c9a84c" opacity="0.88"
-          letter-spacing="2">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
+          fill="#c9a84c" opacity="0.88">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
   </g>
 
-  <!-- Subtle gold inner border -->
+  <!-- Gold inner border -->
   <rect width="512" height="512" rx="96" fill="none"
         stroke="rgba(201,168,76,0.18)" stroke-width="6"/>
 </svg>
