@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { loadGames, deleteGame, getStats } from '@/services/gameStorageService';
+import { loadGames, deleteGame, getStats, saveGame } from '@/services/gameStorageService';
+import { assessReliability } from '@/services/psychProfileService';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PgnImportModal } from '@/components/analysis/PgnImportModal';
@@ -57,6 +58,12 @@ export default function HistoryScreen() {
     setGames(loadGames());
   }
 
+  function toggleProfile(game: SavedGame, e: React.MouseEvent) {
+    e.stopPropagation();
+    saveGame({ ...game, excludeFromProfile: !game.excludeFromProfile });
+    setGames(loadGames());
+  }
+
   function handleImported(gameId?: string) {
     setShowImport(false);
     setGames(loadGames());
@@ -87,9 +94,14 @@ export default function HistoryScreen() {
         <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">
           Parties <span className="text-base font-semibold text-chess-text-muted">({games.length})</span>
         </h1>
-        <Button size="sm" variant="ghost" onClick={() => setShowImport(true)}>
-          Importer
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
+            🧠 Profil
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setShowImport(true)}>
+            Importer
+          </Button>
+        </div>
       </div>
 
       <StatsBanner games={games} />
@@ -122,6 +134,9 @@ export default function HistoryScreen() {
             : null;
 
           const accColor = playerAcc === null ? '' : playerAcc >= 80 ? 'text-chess-win' : playerAcc >= 60 ? 'text-chess-draw' : 'text-chess-loss';
+
+          const reliability = assessReliability(g);
+          const excluded = g.excludeFromProfile === true;
 
           return (
             <div
@@ -158,6 +173,18 @@ export default function HistoryScreen() {
                       {mistakes}?
                     </span>
                   )}
+                  {excluded ? (
+                    <span className="text-xs bg-chess-surface-alt text-chess-text-muted px-1.5 py-0.5 rounded">
+                      Hors profil
+                    </span>
+                  ) : !reliability.reliable && (
+                    <span
+                      className="text-xs bg-chess-draw/10 text-chess-draw px-1.5 py-0.5 rounded"
+                      title={reliability.reasons.join(' · ')}
+                    >
+                      Atypique
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-chess-text-muted mt-0.5">
                   <span>{g.timeControl.label}</span>
@@ -168,6 +195,17 @@ export default function HistoryScreen() {
                   <span>{date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: '2-digit' })}</span>
                 </div>
               </div>
+
+              {/* Profile inclusion toggle */}
+              <button
+                onClick={(e) => toggleProfile(g, e)}
+                className={`shrink-0 w-7 h-7 flex items-center justify-center transition-colors rounded ${
+                  excluded ? 'text-chess-text-muted hover:text-chess-accent' : 'text-chess-accent hover:text-chess-text-muted'
+                }`}
+                title={excluded ? 'Inclure dans le profil' : 'Exclure du profil'}
+              >
+                {excluded ? '🚫' : '🧠'}
+              </button>
 
               {/* Delete */}
               <button

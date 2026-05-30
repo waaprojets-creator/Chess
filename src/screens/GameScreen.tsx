@@ -22,6 +22,10 @@ export default function GameScreen() {
   const navigate = useNavigate();
   const store = useGameStore();
   const isThinkingRef = useRef(false);
+  // Timestamp marking when the side to move started thinking. Reset after every
+  // recorded move (player or bot) so each player move's timeTakenMs reflects real
+  // deliberation time — the basis for the decisional profile.
+  const moveStartRef = useRef<number>(Date.now());
   const [showEndModal, setShowEndModal] = useState(false);
   const [boardWidth, setBoardWidth] = useState(360);
   const { play } = useSounds();
@@ -49,6 +53,11 @@ export default function GameScreen() {
     }
   }, [store.phase]);
 
+  // Start the deliberation clock when the game begins
+  useEffect(() => {
+    if (store.phase === 'playing') moveStartRef.current = Date.now();
+  }, [store.phase]);
+
   const persistGame = useCallback(() => {
     const s = useGameStore.getState();
     if (!s.id || !s.endedAt) return;
@@ -64,6 +73,7 @@ export default function GameScreen() {
       startedAt: s.startedAt,
       endedAt: s.endedAt,
       analyzed: false,
+      excludeFromProfile: s.excludeFromProfile,
     };
     saveGame(saved);
   }, []);
@@ -88,18 +98,19 @@ export default function GameScreen() {
 
       const record: MoveRecord = {
         san: lastMove.san,
-        uci: from + to + (promotion !== 'q' ? promotion : ''),
+        uci: from + to + (lastMove.promotion ?? ''),
         fen: chess.fen(),
         evalCp: null,
         evalMate: null,
         classification: null,
         bestMoveSan: null,
         bestMoveUci: null,
-        timeTakenMs: 0,
+        timeTakenMs: Date.now() - moveStartRef.current,
         moveNumber: Math.ceil(history.length / 2),
         color: lastMove.color,
       };
       store.addMoveRecord(record);
+      moveStartRef.current = Date.now();
 
       // Sound feedback
       if (chess.inCheck()) play('check');
@@ -190,6 +201,8 @@ export default function GameScreen() {
         color: botLastMove.color,
       };
       useGameStore.getState().addMoveRecord(botRecord);
+      // Player's clock starts now that the board is theirs again
+      moveStartRef.current = Date.now();
 
       if (chess2.inCheck()) play('check');
       else if (botLastMove.captured) play('capture');

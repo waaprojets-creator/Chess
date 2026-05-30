@@ -7,6 +7,7 @@ import { EvalBar } from '@/components/board/EvalBar';
 import { MoveList, TreeMoveList } from '@/components/game/MoveList';
 import { AdvantageGraph } from '@/components/analysis/AdvantageGraph';
 import { BestMoveSuggestion } from '@/components/analysis/BestMoveSuggestion';
+import { DecisionInsights } from '@/components/analysis/DecisionInsights';
 import { MoveClassBadge } from '@/components/analysis/MoveClassBadge';
 import { PgnImportModal } from '@/components/analysis/PgnImportModal';
 import { Button } from '@/components/ui/Button';
@@ -271,6 +272,9 @@ export default function AnalysisScreen() {
           </div>
         </div>
       )}
+
+      {/* Decisional post-mortem */}
+      {store.game && <DecisionInsights game={store.game} />}
     </div>
   );
 }

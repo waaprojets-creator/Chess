@@ -5,6 +5,7 @@ import GameScreen from '@/screens/GameScreen';
 import AnalysisScreen from '@/screens/AnalysisScreen';
 import PuzzlesScreen from '@/screens/PuzzlesScreen';
 import HistoryScreen from '@/screens/HistoryScreen';
+import ProfileScreen from '@/screens/ProfileScreen';
 import NavBar from '@/components/ui/NavBar';
 import { useAnalysisStore } from '@/store/analysisStore';
 
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/analysis" element={<AnalysisScreen />} />
             <Route path="/puzzles" element={<PuzzlesScreen />} />
             <Route path="/history" element={<HistoryScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

@@ -74,10 +74,10 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           <p className="text-sm font-medium text-chess-text-secondary">Améliorations prévues</p>
           <ul className="space-y-1.5">
             {[
-              { icon: '🧠', label: 'Analyse psychologique', desc: 'Tempo, résilience, style décisionnel' },
               { icon: '♟️', label: 'Multijoueur en ligne', desc: 'Parties classées et amicales' },
               { icon: '🌡️', label: 'Heatmaps de tension', desc: 'Zones d\'influence post-partie' },
               { icon: '🎯', label: 'Mode Concentration', desc: 'Interface épurée, sans distraction' },
+              { icon: '🧊', label: 'Rendu 3D du plateau', desc: 'Matériaux et lumière (WebGL)' },
               { icon: '🎲', label: 'Tournois locaux', desc: 'Suisse, round-robin entre amis' },
               { icon: '🌐', label: 'Import depuis Lichess / Chess.com', desc: 'Synchronisation de l\'historique' },
             ].map(({ icon, label, desc }) => (

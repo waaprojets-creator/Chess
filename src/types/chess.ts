@@ -71,6 +71,7 @@ export interface GameState {
   boardFlipped: boolean;
   vsHuman: boolean;
   engineMode: EngineMode;
+  excludeFromProfile: boolean;
 }
 
 export interface MoveNode {
@@ -92,6 +93,7 @@ export interface SavedGame {
   analyzed: boolean;
   deepAnalyzed?: boolean;
   accuracy?: { white: number; black: number };
+  excludeFromProfile?: boolean;
 }
 
 export interface PuzzleEntry {

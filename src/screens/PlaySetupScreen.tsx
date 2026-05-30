@@ -17,6 +17,7 @@ export default function PlaySetupScreen() {
   const [elo, setElo] = useState(1200);
   const [tc, setTc] = useState<TimeControl>(TIME_CONTROLS[6]!);
   const [engineMode, setEngineMode] = useState<EngineMode>('stockfish');
+  const [includeInProfile, setIncludeInProfile] = useState(true);
 
   const nearestProfile = BOT_PROFILES.reduce((p, c) =>
     Math.abs(c.elo - elo) < Math.abs(p.elo - elo) ? c : p
@@ -30,7 +31,7 @@ export default function PlaySetupScreen() {
       chosenColor = color === ('white' as unknown as PieceColor) ? 'w' : 'b';
     }
     const vsHuman = opponent === 'human';
-    startGame(chosenColor, vsHuman ? 0 : elo, tc, vsHuman, vsHuman ? 'stockfish' : engineMode);
+    startGame(chosenColor, vsHuman ? 0 : elo, tc, vsHuman, vsHuman ? 'stockfish' : engineMode, !includeInProfile);
     navigate('/game');
   }
 
@@ -176,6 +177,29 @@ export default function PlaySetupScreen() {
             );
           })}
         </div>
+      </section>
+
+      {/* Decisional profile inclusion */}
+      <section className="flex items-center justify-between rounded-2xl border border-chess-border/60 bg-surface-gradient px-4 py-3">
+        <div className="min-w-0 pr-3">
+          <div className="text-sm font-semibold text-chess-text-secondary">Inclure dans mon profil</div>
+          <div className="text-xs text-chess-text-muted">Analyse décisionnelle (tempo, résilience…)</div>
+        </div>
+        <button
+          onClick={() => setIncludeInProfile((v) => !v)}
+          className={`relative w-12 h-6 shrink-0 rounded-full transition-colors ${
+            includeInProfile ? 'bg-chess-accent' : 'bg-chess-surface-alt'
+          }`}
+          role="switch"
+          aria-checked={includeInProfile}
+          aria-label="Inclure cette partie dans le profil décisionnel"
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+              includeInProfile ? 'translate-x-6' : 'translate-x-0'
+            }`}
+          />
+        </button>
       </section>
 
       <Button fullWidth size="lg" onClick={handleStart}>
