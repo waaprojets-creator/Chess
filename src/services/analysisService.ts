@@ -20,9 +20,11 @@ export async function analyzeGame(
   const uciMoves: string[] = [];
   const accScores: { w: number[]; b: number[] } = { w: [], b: [] };
 
-  // Starting position: get best move + eval (serves as prevAnalysis for the first move,
-  // avoiding a redundant Stockfish call per iteration)
-  let prevAnalysis = await stockfish.analyzePosition(START_FEN, [], 14);
+  // 1 second per position → predictable total time (~N+1 seconds for N moves)
+  const DEPTH = 18;
+  const MOVETIME = 1000;
+
+  let prevAnalysis = await stockfish.analyzePosition(START_FEN, [], DEPTH, MOVETIME);
   let prevEvalCpWhite =
     prevAnalysis.score?.type === 'cp'
       ? prevAnalysis.score.value
@@ -40,7 +42,7 @@ export async function analyzeGame(
     const bestUci = prevAnalysis.pv[0] ?? '';
 
     // Eval at the position after this move
-    const result = await stockfish.analyzePosition(START_FEN, uciMoves, 14);
+    const result = await stockfish.analyzePosition(START_FEN, uciMoves, DEPTH, MOVETIME);
 
     const score = result.score;
     const evalCp = score?.type === 'cp' ? score.value : null;

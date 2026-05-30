@@ -148,7 +148,8 @@ export class StockfishService {
   analyzePosition(
     fen: string,
     moves: string[],
-    depth = 16
+    depth = 18,
+    movetime = 1000
   ): Promise<{ score: ScoreInfo | null; pv: string[] }> {
     return new Promise((resolve) => {
       let lastScore: ScoreInfo | null = null;
@@ -165,7 +166,7 @@ export class StockfishService {
         }
       });
       this.setPosition(fen, moves);
-      this.go(undefined, depth);
+      this.go(movetime, depth);
     });
   }
 
