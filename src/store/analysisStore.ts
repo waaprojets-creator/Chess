@@ -10,6 +10,8 @@ interface AnalysisStore {
   currentMoveIndex: number;
   isAnalyzing: boolean;
   analysisProgress: number;
+  isDeepAnalyzing: boolean;
+  deepAnalysisProgress: number;
   moves: MoveRecord[];
   graphData: EvalPoint[];
   currentFen: string;
@@ -17,6 +19,8 @@ interface AnalysisStore {
 
   loadGame: (game: SavedGame) => void;
   startAnalysis: () => Promise<void>;
+  startDeepAnalysis: () => Promise<void>;
+  cancelDeepAnalysis: () => void;
   goToMove: (index: number) => void;
   nextMove: () => void;
   prevMove: () => void;
@@ -24,14 +28,17 @@ interface AnalysisStore {
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
+let deepCancelSignal: { cancelled: boolean } | null = null;
+
 function fenAtMove(moves: MoveRecord[], index: number): string {
   if (index < 0) return START_FEN;
   return moves[index]?.fen ?? START_FEN;
 }
 
+// Arrow shows the best move FROM the current position (after move `index`).
+// bestMoveUci on moves[index+1] = engine's top choice from the position shown at index.
 function arrowsAtMove(moves: MoveRecord[], index: number): Arrow[] {
-  if (index < 0 || index >= moves.length) return [];
-  const m = moves[index];
+  const m = moves[index + 1];
   if (!m?.bestMoveUci) return [];
   return [
     {
@@ -47,6 +54,8 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
   currentMoveIndex: -1,
   isAnalyzing: false,
   analysisProgress: 0,
+  isDeepAnalyzing: false,
+  deepAnalysisProgress: 0,
   moves: [],
   graphData: [],
   currentFen: START_FEN,
@@ -70,6 +79,8 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
       currentArrows: arrowsAtMove(moves, moves.length - 1),
       isAnalyzing: false,
       analysisProgress: 0,
+      isDeepAnalyzing: false,
+      deepAnalysisProgress: 0,
     });
   },
 
@@ -85,7 +96,8 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
       const { moves, graphData, accuracy } = await analyzeGame(
         game,
         sf,
-        (idx, total) => set({ analysisProgress: idx / total })
+        (idx, total) => set({ analysisProgress: idx / total }),
+        'fast'
       );
 
       const updatedGame: SavedGame = { ...game, moves, analyzed: true, accuracy };
@@ -103,6 +115,51 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
       console.error('[Analysis]', err);
       set({ isAnalyzing: false });
     }
+  },
+
+  async startDeepAnalysis() {
+    const { game } = get();
+    if (!game || get().isDeepAnalyzing) return;
+
+    deepCancelSignal = { cancelled: false };
+    set({ isDeepAnalyzing: true, deepAnalysisProgress: 0 });
+    try {
+      const sf = getStockfishService();
+      await sf.waitReady();
+
+      const { moves, graphData, accuracy } = await analyzeGame(
+        game,
+        sf,
+        (idx, total) => set({ deepAnalysisProgress: idx / total }),
+        'deep',
+        deepCancelSignal
+      );
+
+      if (deepCancelSignal?.cancelled) {
+        set({ isDeepAnalyzing: false });
+        return;
+      }
+
+      const updatedGame: SavedGame = { ...game, moves, analyzed: true, deepAnalyzed: true, accuracy };
+      saveGame(updatedGame);
+
+      set({
+        game: updatedGame,
+        moves,
+        graphData,
+        isDeepAnalyzing: false,
+        deepAnalysisProgress: 1,
+        currentArrows: arrowsAtMove(moves, get().currentMoveIndex),
+      });
+    } catch (err) {
+      console.error('[DeepAnalysis]', err);
+      set({ isDeepAnalyzing: false });
+    }
+  },
+
+  cancelDeepAnalysis() {
+    if (deepCancelSignal) deepCancelSignal.cancelled = true;
+    set({ isDeepAnalyzing: false });
   },
 
   goToMove(index) {

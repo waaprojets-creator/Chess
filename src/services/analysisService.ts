@@ -5,6 +5,8 @@ import type { StockfishService } from './stockfishService';
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
+export type AnalysisMode = 'fast' | 'deep';
+
 function cpLossToAccuracy(cpLoss: number): number {
   if (cpLoss <= 0) return 100;
   return Math.max(0, Math.round(100 - Math.min(100, cpLoss / 4)));
@@ -13,16 +15,17 @@ function cpLossToAccuracy(cpLoss: number): number {
 export async function analyzeGame(
   game: SavedGame,
   stockfish: StockfishService,
-  onProgress?: (idx: number, total: number) => void
+  onProgress?: (idx: number, total: number) => void,
+  mode: AnalysisMode = 'fast',
+  signal?: { cancelled: boolean }
 ): Promise<{ moves: MoveRecord[]; graphData: EvalPoint[]; accuracy: { white: number; black: number } }> {
   const moves = game.moves.map((m) => ({ ...m }));
   const graphData: EvalPoint[] = [];
   const uciMoves: string[] = [];
   const accScores: { w: number[]; b: number[] } = { w: [], b: [] };
 
-  // 1 second per position → predictable total time (~N+1 seconds for N moves)
-  const DEPTH = 18;
-  const MOVETIME = 1000;
+  const DEPTH = mode === 'fast' ? 12 : 18;
+  const MOVETIME = mode === 'fast' ? 150 : Math.min(900, Math.floor(38000 / Math.max(1, moves.length)));
 
   let prevAnalysis = await stockfish.analyzePosition(START_FEN, [], DEPTH, MOVETIME);
   let prevEvalCpWhite =
@@ -33,6 +36,8 @@ export async function analyzeGame(
       : 0;
 
   for (let i = 0; i < moves.length; i++) {
+    if (signal?.cancelled) break;
+
     const move = moves[i]!;
     uciMoves.push(move.uci);
 

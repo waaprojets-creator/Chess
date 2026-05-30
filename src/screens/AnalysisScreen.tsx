@@ -97,13 +97,30 @@ export default function AnalysisScreen() {
           </Button>
           {!store.game?.analyzed && !store.isAnalyzing && store.game && (
             <Button size="sm" onClick={() => store.startAnalysis()}>
-              Analyser
+              Analyser (~8s)
             </Button>
           )}
           {store.isAnalyzing && (
             <div className="flex items-center gap-2 text-sm text-chess-text-secondary">
               <div className="w-4 h-4 border-2 border-chess-accent border-t-transparent rounded-full animate-spin" />
               {Math.round(store.analysisProgress * 100)}%
+            </div>
+          )}
+          {store.game?.analyzed && !store.game.deepAnalyzed && !store.isDeepAnalyzing && !store.isAnalyzing && (
+            <Button size="sm" variant="ghost" onClick={() => store.startDeepAnalysis()}>
+              Approfondir (~40s)
+            </Button>
+          )}
+          {store.isDeepAnalyzing && (
+            <div className="flex items-center gap-2 text-sm text-chess-text-secondary">
+              <div className="w-4 h-4 border-2 border-chess-accent border-t-transparent rounded-full animate-spin" />
+              <span>Profond {Math.round(store.deepAnalysisProgress * 100)}%</span>
+              <button
+                onClick={() => store.cancelDeepAnalysis()}
+                className="text-chess-text-muted hover:text-chess-text-primary text-xs underline"
+              >
+                Annuler
+              </button>
             </div>
           )}
         </div>
