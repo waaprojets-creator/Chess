@@ -68,6 +68,26 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             />
           </button>
         </div>
+
+        {/* Future roadmap */}
+        <div className="space-y-2 pt-1 border-t border-chess-border/30">
+          <p className="text-sm font-medium text-chess-text-secondary">Améliorations prévues</p>
+          <ul className="space-y-1.5">
+            {[
+              { icon: '🧠', label: 'Analyse psychologique', desc: 'Tempo, résilience, style décisionnel' },
+              { icon: '♟️', label: 'Multijoueur en ligne', desc: 'Parties classées et amicales' },
+              { icon: '🌡️', label: 'Heatmaps de tension', desc: 'Zones d\'influence post-partie' },
+              { icon: '🎯', label: 'Mode Concentration', desc: 'Interface épurée, sans distraction' },
+              { icon: '🎲', label: 'Tournois locaux', desc: 'Suisse, round-robin entre amis' },
+              { icon: '🌐', label: 'Import depuis Lichess / Chess.com', desc: 'Synchronisation de l\'historique' },
+            ].map(({ icon, label, desc }) => (
+              <li key={label} className="flex items-start gap-2.5 text-xs text-chess-text-muted">
+                <span className="mt-0.5 shrink-0">{icon}</span>
+                <span><span className="text-chess-text-secondary font-medium">{label}</span> — {desc}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
