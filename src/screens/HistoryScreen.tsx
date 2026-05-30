@@ -1,9 +1,50 @@
 import { useNavigate } from 'react-router-dom';
-import { loadGames, deleteGame } from '@/services/gameStorageService';
+import { loadGames, deleteGame, getStats } from '@/services/gameStorageService';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PgnImportModal } from '@/components/analysis/PgnImportModal';
 import type { SavedGame } from '@/types/chess';
+
+function StatsBanner({ games }: { games: SavedGame[] }) {
+  const stats = getStats();
+  if (stats.total === 0) return null;
+
+  const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
+  const trendIcon = stats.accuracyTrend === null ? null
+    : stats.accuracyTrend > 2 ? '↑' : stats.accuracyTrend < -2 ? '↓' : '→';
+  const trendColor = stats.accuracyTrend === null ? ''
+    : stats.accuracyTrend > 2 ? 'text-chess-win' : stats.accuracyTrend < -2 ? 'text-chess-loss' : 'text-chess-text-muted';
+
+  const analyzedCount = games.filter((g) => g.analyzed).length;
+
+  return (
+    <div className="grid grid-cols-4 gap-2 mb-4 p-3 bg-chess-surface rounded-2xl border border-chess-border/40">
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-lg font-black text-chess-text-primary">{stats.total}</span>
+        <span className="text-[10px] text-chess-text-muted">Parties</span>
+      </div>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-lg font-black text-chess-win">{winRate}%</span>
+        <span className="text-[10px] text-chess-text-muted">Victoires</span>
+      </div>
+      <div className="flex flex-col items-center gap-0.5">
+        {stats.avgAccuracy !== null ? (
+          <span className="text-lg font-black text-chess-accent-light flex items-center gap-0.5">
+            {stats.avgAccuracy}%
+            {trendIcon && <span className={`text-sm ${trendColor}`}>{trendIcon}</span>}
+          </span>
+        ) : (
+          <span className="text-lg font-black text-chess-text-muted">—</span>
+        )}
+        <span className="text-[10px] text-chess-text-muted">Précision</span>
+      </div>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-lg font-black text-chess-text-primary">{analyzedCount}</span>
+        <span className="text-[10px] text-chess-text-muted">Analysées</span>
+      </div>
+    </div>
+  );
+}
 
 export default function HistoryScreen() {
   const navigate = useNavigate();
@@ -51,6 +92,8 @@ export default function HistoryScreen() {
         </Button>
       </div>
 
+      <StatsBanner games={games} />
+
       <div className="space-y-2.5">
         {games.map((g) => {
           const playerWon =
@@ -68,6 +111,18 @@ export default function HistoryScreen() {
           const date = new Date(g.startedAt);
           const duration = g.endedAt ? Math.round((g.endedAt - g.startedAt) / 60_000) : 0;
 
+          const playerAcc = g.accuracy
+            ? (g.playerColor === 'w' ? g.accuracy.white : g.accuracy.black)
+            : null;
+          const blunders = g.analyzed
+            ? g.moves.filter((m) => m.classification === 'blunder').length
+            : null;
+          const mistakes = g.analyzed
+            ? g.moves.filter((m) => m.classification === 'mistake').length
+            : null;
+
+          const accColor = playerAcc === null ? '' : playerAcc >= 80 ? 'text-chess-win' : playerAcc >= 60 ? 'text-chess-draw' : 'text-chess-loss';
+
           return (
             <div
               key={g.id}
@@ -77,17 +132,30 @@ export default function HistoryScreen() {
               {/* Result pill */}
               <div className={`shrink-0 ${resultBg} rounded-xl px-2.5 py-1.5 text-center min-w-[64px]`}>
                 <div className={`text-sm font-bold ${resultColor}`}>{resultLabel}</div>
+                {playerAcc !== null && (
+                  <div className={`text-xs font-semibold ${accColor}`}>{playerAcc}%</div>
+                )}
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-chess-text-primary">
-                    {g.playerColor === 'w' ? '♔' : '♚'} vs Bot {g.botElo}
+                    {g.playerColor === 'w' ? '♔' : '♚'} vs {g.botElo > 0 ? `Bot ${g.botElo}` : 'Humain'}
                   </span>
                   {g.analyzed && (
                     <span className="text-xs bg-chess-accent/20 text-chess-accent px-1.5 py-0.5 rounded">
                       Analysé
+                    </span>
+                  )}
+                  {blunders !== null && blunders > 0 && (
+                    <span className="text-xs bg-chess-blunder/10 text-chess-blunder px-1.5 py-0.5 rounded">
+                      {blunders}??
+                    </span>
+                  )}
+                  {mistakes !== null && mistakes > 0 && (
+                    <span className="text-xs bg-chess-mistake/10 text-chess-mistake px-1.5 py-0.5 rounded">
+                      {mistakes}?
                     </span>
                   )}
                 </div>

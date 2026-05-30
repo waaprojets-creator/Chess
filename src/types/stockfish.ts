@@ -2,6 +2,11 @@ export type ScoreInfo =
   | { type: 'cp'; value: number }
   | { type: 'mate'; value: number };
 
+export interface PvLine {
+  score: ScoreInfo;
+  pv: string[];
+}
+
 export type WorkerCommand =
   | { type: 'init' }
   | { type: 'setElo'; elo: number }
@@ -13,5 +18,5 @@ export type WorkerCommand =
 export type WorkerEvent =
   | { type: 'ready' }
   | { type: 'bestmove'; move: string; ponder: string | null; score: ScoreInfo | null }
-  | { type: 'info'; depth: number; score: ScoreInfo; pv: string[] }
+  | { type: 'info'; depth: number; score: ScoreInfo; pv: string[]; multipv?: number }
   | { type: 'error'; message: string };

@@ -36,23 +36,46 @@ export function deleteGame(id: string): void {
   } catch {}
 }
 
-export function getStats(): { total: number; wins: number; losses: number; draws: number } {
+export interface GameStats {
+  total: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  avgAccuracy: number | null;
+  accuracyTrend: number | null; // positive = improving, negative = declining
+}
+
+export function getStats(): GameStats {
   const games = loadGames();
-  return games.reduce(
-    (acc, g) => {
-      acc.total++;
-      if (g.result === null) return acc;
-      const playerWon =
-        (g.result === 'white' && g.playerColor === 'w') ||
-        (g.result === 'black' && g.playerColor === 'b');
-      const playerLost =
-        (g.result === 'white' && g.playerColor === 'b') ||
-        (g.result === 'black' && g.playerColor === 'w');
-      if (playerWon) acc.wins++;
-      else if (playerLost) acc.losses++;
-      else acc.draws++;
-      return acc;
-    },
-    { total: 0, wins: 0, losses: 0, draws: 0 }
-  );
+  let wins = 0, losses = 0, draws = 0;
+  const accuracies: number[] = [];
+
+  for (const g of games) {
+    if (g.result !== null) {
+      const playerWon = (g.result === 'white' && g.playerColor === 'w') || (g.result === 'black' && g.playerColor === 'b');
+      const playerLost = (g.result === 'white' && g.playerColor === 'b') || (g.result === 'black' && g.playerColor === 'w');
+      if (playerWon) wins++;
+      else if (playerLost) losses++;
+      else draws++;
+    }
+    if (g.accuracy) {
+      const playerAcc = g.playerColor === 'w' ? g.accuracy.white : g.accuracy.black;
+      accuracies.push(playerAcc);
+    }
+  }
+
+  const avg = (arr: number[]) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+  const avgAccuracy = avg(accuracies);
+
+  let accuracyTrend: number | null = null;
+  if (accuracies.length >= 4) {
+    // Compare last 5 vs previous 5 (games are newest-first)
+    const recent = accuracies.slice(0, Math.min(5, accuracies.length));
+    const older = accuracies.slice(Math.min(5, accuracies.length), Math.min(10, accuracies.length));
+    if (older.length > 0) {
+      accuracyTrend = (avg(recent) ?? 0) - (avg(older) ?? 0);
+    }
+  }
+
+  return { total: games.length, wins, losses, draws, avgAccuracy, accuracyTrend };
 }

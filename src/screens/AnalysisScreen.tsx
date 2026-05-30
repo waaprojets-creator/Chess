@@ -1,10 +1,10 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAnalysisStore } from '@/store/analysisStore';
+import { useAnalysisStore, flattenMainLine } from '@/store/analysisStore';
 import { getGameById } from '@/services/gameStorageService';
 import { ChessBoard } from '@/components/board/ChessBoard';
 import { EvalBar } from '@/components/board/EvalBar';
-import { MoveList } from '@/components/game/MoveList';
+import { MoveList, TreeMoveList } from '@/components/game/MoveList';
 import { AdvantageGraph } from '@/components/analysis/AdvantageGraph';
 import { BestMoveSuggestion } from '@/components/analysis/BestMoveSuggestion';
 import { MoveClassBadge } from '@/components/analysis/MoveClassBadge';
@@ -22,8 +22,7 @@ export default function AnalysisScreen() {
 
   useEffect(() => {
     function measure() {
-      const vw = window.innerWidth;
-      setBoardWidth(Math.min(vw - 32, 400));
+      setBoardWidth(Math.min(window.innerWidth - 32, 400));
     }
     measure();
     window.addEventListener('resize', measure);
@@ -46,13 +45,28 @@ export default function AnalysisScreen() {
     return () => window.removeEventListener('keydown', handler);
   }, [store]);
 
-  const currentMove = store.moves[store.currentMoveIndex];
+  const currentNode = store.currentPath.length > 0
+    ? (() => {
+        let nodes = store.rootChildren;
+        for (let i = 0; i < store.currentPath.length; i++) {
+          const n = nodes[store.currentPath[i]!];
+          if (!n) return null;
+          if (i === store.currentPath.length - 1) return n;
+          nodes = n.children;
+        }
+        return null;
+      })()
+    : null;
+
+  const currentMove = currentNode?.record ?? null;
   const currentEvalCp = currentMove?.evalCp ?? null;
   const currentEvalMate = currentMove?.evalMate ?? null;
 
+  // Summary counts from main line
+  const mainMoves = flattenMainLine(store.rootChildren);
   const summary = (() => {
     const counts: Record<string, number> = {};
-    store.moves.forEach((m) => {
+    mainMoves.forEach((m) => {
       if (m.classification) {
         counts[m.classification] = (counts[m.classification] ?? 0) + 1;
       }
@@ -60,8 +74,6 @@ export default function AnalysisScreen() {
     return counts;
   })();
 
-  // No game requested → friendly empty state instead of a blank scaffold.
-  // (An invalid gameId is redirected to /history by the effect above.)
   if (!gameId) {
     return (
       <div className="screen-enter mx-auto flex max-w-lg flex-col items-center justify-center px-6 py-24 text-center">
@@ -91,7 +103,7 @@ export default function AnalysisScreen() {
 
       <div className="flex items-center justify-between pt-5">
         <h1 className="text-2xl font-black tracking-tight text-chess-text-primary">Analyse</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <Button size="sm" variant="ghost" onClick={() => setShowImport(true)}>
             Importer
           </Button>
@@ -126,6 +138,19 @@ export default function AnalysisScreen() {
         </div>
       </div>
 
+      {/* Variation indicator */}
+      {store.isInVariation && (
+        <div className="flex items-center gap-2 text-xs text-chess-accent-light bg-chess-accent/10 rounded-xl px-3 py-1.5">
+          <span className="font-semibold">Variante</span>
+          <button
+            onClick={() => store.goToMainLine()}
+            className="underline hover:text-chess-accent"
+          >
+            ← Ligne principale
+          </button>
+        </div>
+      )}
+
       {/* Board + eval */}
       <div className="flex items-center gap-2">
         <EvalBar
@@ -138,7 +163,11 @@ export default function AnalysisScreen() {
           fen={store.currentFen}
           boardFlipped={store.game?.playerColor === 'b'}
           arrows={store.currentArrows}
-          interactive={false}
+          interactive={true}
+          onMove={(from, to, promo) => {
+            store.playVariation(from, to, promo);
+            return true;
+          }}
           width={boardWidth - 28}
         />
       </div>
@@ -146,7 +175,7 @@ export default function AnalysisScreen() {
       {/* Navigation */}
       <div className="flex items-center justify-center gap-3">
         <button
-          onClick={() => store.goToMove(-1)}
+          onClick={() => store.goToPath([])}
           className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏮
@@ -164,7 +193,7 @@ export default function AnalysisScreen() {
           ▶
         </button>
         <button
-          onClick={() => store.goToMove(store.moves.length - 1)}
+          onClick={() => store.goToMainLine()}
           className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏭
@@ -180,25 +209,24 @@ export default function AnalysisScreen() {
           <div className="text-xs text-chess-text-muted font-medium">Graphe d'avantage</div>
           <AdvantageGraph
             data={store.graphData}
-            currentIndex={store.currentMoveIndex}
+            currentIndex={store.currentPath.every((v) => v === 0) ? store.currentPath.length - 1 : -1}
             onMoveClick={store.goToMove}
           />
         </div>
       )}
 
-      {/* Move list */}
-      <div className="bg-chess-surface rounded-xl overflow-hidden" style={{ maxHeight: 200 }}>
-        <MoveList
-          moves={store.moves}
-          currentIndex={store.currentMoveIndex}
-          onMoveClick={store.goToMove}
+      {/* Tree move list */}
+      <div className="bg-chess-surface rounded-xl overflow-hidden p-2" style={{ maxHeight: 200 }}>
+        <TreeMoveList
+          rootChildren={store.rootChildren}
+          currentPath={store.currentPath}
+          onNavigate={store.goToPath}
         />
       </div>
 
       {/* Accuracy + Summary */}
       {store.game?.analyzed && Object.keys(summary).length > 0 && (
         <div className="bg-chess-surface rounded-xl p-4 space-y-3">
-          {/* Accuracy per player */}
           {store.game.accuracy && (
             <div className="flex gap-4 pb-3 border-b border-chess-border/40">
               {[

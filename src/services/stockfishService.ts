@@ -1,4 +1,4 @@
-import type { WorkerEvent, ScoreInfo } from '@/types/stockfish';
+import type { WorkerEvent, ScoreInfo, PvLine } from '@/types/stockfish';
 import type { BotProfile } from '@/constants/elo';
 
 type EventHandler = (e: WorkerEvent) => void;
@@ -16,6 +16,7 @@ export class StockfishService {
   private readyResolve!: () => void;
   private initialized = false;
   private lastScore: ScoreInfo | null = null;
+  private pvLines: Map<number, PvLine> = new Map();
 
   constructor() {
     const engineUrl = `${import.meta.env.BASE_URL}stockfish/stockfish-nnue-16-single.js`;
@@ -64,6 +65,7 @@ export class StockfishService {
       const ponder = parts[3] || null;
       this.emit({ type: 'bestmove', move, ponder, score: this.lastScore });
       this.lastScore = null;
+      this.pvLines.clear();
       return;
     }
 
@@ -73,18 +75,23 @@ export class StockfishService {
       const cpM = line.match(/score cp (-?\d+)/);
       const mateM = line.match(/score mate (-?\d+)/);
       const pvM = line.match(/ pv (.+?)(?= bm| string|$)/);
+      const multipvM = line.match(/multipv (\d+)/);
 
       const depth = parseInt(depthM[1]!, 10);
       const pv = pvM ? pvM[1]!.trim().split(' ') : [];
+      const multipvIdx = multipvM ? parseInt(multipvM[1]!, 10) : 1;
 
+      let score: ScoreInfo | null = null;
       if (cpM) {
-        this.lastScore = { type: 'cp', value: parseInt(cpM[1]!, 10) };
+        score = { type: 'cp', value: parseInt(cpM[1]!, 10) };
       } else if (mateM) {
-        this.lastScore = { type: 'mate', value: parseInt(mateM[1]!, 10) };
+        score = { type: 'mate', value: parseInt(mateM[1]!, 10) };
       }
 
-      if (this.lastScore) {
-        this.emit({ type: 'info', depth, score: this.lastScore, pv });
+      if (score) {
+        this.lastScore = multipvIdx === 1 ? score : this.lastScore;
+        this.pvLines.set(multipvIdx, { score, pv });
+        this.emit({ type: 'info', depth, score, pv, multipv: multipvIdx });
       }
     }
   }
@@ -167,6 +174,61 @@ export class StockfishService {
       });
       this.setPosition(fen, moves);
       this.go(movetime, depth);
+    });
+  }
+
+  setMultiPV(n: number): void {
+    this.send(`setoption name MultiPV value ${n}`);
+  }
+
+  getHumanMove(
+    fen: string,
+    moves: string[],
+    profile: BotProfile
+  ): Promise<{ move: string; score: ScoreInfo | null }> {
+    return new Promise((resolve) => {
+      const lines = new Map<number, PvLine>();
+
+      const off = this.onEvent((e) => {
+        if (e.type === 'info' && e.multipv !== undefined) {
+          lines.set(e.multipv, { score: e.score, pv: e.pv });
+        }
+        if (e.type === 'bestmove') {
+          off();
+          this.setMultiPV(1);
+
+          const candidates: Array<{ move: string; score: ScoreInfo }> = [];
+          for (const [, line] of lines) {
+            if (line.pv[0]) candidates.push({ move: line.pv[0], score: line.score });
+          }
+
+          if (candidates.length === 0) {
+            resolve({ move: e.move, score: e.score });
+            return;
+          }
+
+          // Weight selection by Elo — lower Elo = more random
+          const elo = profile.elo;
+          const weights =
+            elo <= 800  ? [40, 35, 25] :
+            elo <= 1400 ? [60, 28, 12] :
+                          [85, 12,  3];
+
+          const pool: string[] = [];
+          candidates.forEach((c, i) => {
+            const w = weights[i] ?? 3;
+            for (let j = 0; j < w; j++) pool.push(c.move);
+          });
+
+          const chosen = pool[Math.floor(Math.random() * pool.length)]!;
+          const chosenLine = candidates.find((c) => c.move === chosen);
+          resolve({ move: chosen, score: chosenLine?.score ?? null });
+        }
+      });
+
+      this.setMultiPV(3);
+      this.setPosition(fen, moves);
+      this.go(profile.movetime, profile.depth ?? undefined);
     });
   }
 

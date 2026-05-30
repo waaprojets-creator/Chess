@@ -1,5 +1,7 @@
 export type PieceColor = 'w' | 'b';
 
+export type EngineMode = 'stockfish' | 'human';
+
 export interface TimeControl {
   minutes: number;
   increment: number;
@@ -67,6 +69,13 @@ export interface GameState {
   startedAt: number;
   endedAt: number | null;
   boardFlipped: boolean;
+  vsHuman: boolean;
+  engineMode: EngineMode;
+}
+
+export interface MoveNode {
+  record: MoveRecord;
+  children: MoveNode[];
 }
 
 export interface SavedGame {
