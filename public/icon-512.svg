@@ -55,15 +55,10 @@
       opacity="0.55"
     />
 
-    <!-- Chess king, white, centered -->
-    <text x="256" y="348" font-size="290" text-anchor="middle"
-          font-family="Georgia,'Times New Roman',serif"
-          fill="#ffffff" opacity="0.96">&#9812;</text>
-
-    <!-- Arabic calligraphy : شطرنج -->
-    <text x="256" y="478" font-size="62" text-anchor="middle"
+    <!-- Arabic calligraphy : شطرنج — élément principal -->
+    <text x="256" y="310" font-size="148" text-anchor="middle"
           font-family="'Amiri','Scheherazade New','Traditional Arabic','Arabic Typesetting',serif"
-          fill="#c9a84c" opacity="0.88">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
+          fill="#ffffff" opacity="0.97">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
   </g>
 
   <!-- Gold inner border -->
