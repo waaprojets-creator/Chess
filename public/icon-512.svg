@@ -56,7 +56,7 @@
     />
 
     <!-- Arabic calligraphy : شطرنج — élément principal -->
-    <text x="256" y="285" font-size="126" text-anchor="middle"
+    <text x="256" y="259" font-size="126" text-anchor="middle"
           font-family="'Amiri','Scheherazade New','Traditional Arabic','Arabic Typesetting',serif"
           fill="#ffffff" opacity="0.97">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
   </g>
