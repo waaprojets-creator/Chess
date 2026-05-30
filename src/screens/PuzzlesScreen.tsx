@@ -122,6 +122,11 @@ export default function PuzzlesScreen() {
             Voir la solution
           </Button>
         )}
+        {store.status === 'failed' && (
+          <Button variant="ghost" onClick={store.retryPuzzle}>
+            ↺ Réessayer
+          </Button>
+        )}
         {(store.status === 'correct' || store.status === 'failed') && (
           <Button fullWidth onClick={store.nextPuzzle}>
             Puzzle suivant →

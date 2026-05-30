@@ -173,28 +173,28 @@ export default function AnalysisScreen() {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-4">
         <button
           onClick={() => store.goToPath([])}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
+          className="flex h-12 w-12 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-lg text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏮
         </button>
         <button
           onClick={store.prevMove}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
+          className="flex h-12 w-14 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-lg text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ◀
         </button>
         <button
           onClick={store.nextMove}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
+          className="flex h-12 w-14 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-lg text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ▶
         </button>
         <button
           onClick={() => store.goToMainLine()}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
+          className="flex h-12 w-12 items-center justify-center rounded-xl border border-chess-border/60 bg-surface-gradient text-lg text-chess-text-secondary transition-all hover:border-chess-accent/40 hover:text-chess-text-primary active:scale-95"
         >
           ⏭
         </button>
