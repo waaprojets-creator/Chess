@@ -139,4 +139,6 @@ export interface CognitiveSession {
   thetaFinal: number | null;
   band: CognitiveBand | null;
   percentile: number | null;
+  iq: number | null;
+  iqCI: [number, number] | null;
 }

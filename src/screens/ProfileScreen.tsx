@@ -98,7 +98,14 @@ export default function ProfileScreen() {
               </span>
             </div>
             <div>
-              <div className="text-sm font-bold text-chess-text-primary">{BAND_LABELS[latestCog.band]}</div>
+              <div className="text-sm font-bold text-chess-text-primary">
+                {BAND_LABELS[latestCog.band]}
+                {(latestCog.iq ?? latestCog.thetaFinal != null) && (
+                  <span className="ml-2 text-xs font-semibold text-chess-text-muted">
+                    QI ≈ {latestCog.iq ?? Math.round(100 + 15 * (latestCog.thetaFinal ?? 0))}
+                  </span>
+                )}
+              </div>
               {cogContext && (
                 <p className="text-xs text-chess-text-muted mt-0.5 leading-relaxed">{cogContext}</p>
               )}

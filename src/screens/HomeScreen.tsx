@@ -65,7 +65,15 @@ export default function HomeScreen() {
         <ActionCard
           icon="🧠"
           title="Cognitif"
-          subtitle={latestCog?.band ? BAND_LABELS[latestCog.band] : 'Testez votre Gf'}
+          subtitle={
+            latestCog?.iq != null
+              ? `QI ≈ ${latestCog.iq}`
+              : latestCog?.thetaFinal != null
+                ? `QI ≈ ${Math.round(100 + 15 * latestCog.thetaFinal)}`
+                : latestCog?.band
+                  ? BAND_LABELS[latestCog.band]
+                  : 'Testez votre Gf'
+          }
           accent="#1baca6"
           onClick={() => navigate('/cognitive')}
         />

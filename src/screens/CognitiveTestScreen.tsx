@@ -78,7 +78,14 @@ export default function CognitiveTestScreen() {
               </span>
             </div>
             <div className="min-w-0">
-              <div className="text-sm font-bold text-chess-text-primary">{BAND_LABELS[latestSession.band]}</div>
+              <div className="text-sm font-bold text-chess-text-primary">
+                {BAND_LABELS[latestSession.band]}
+                {(latestSession.iq ?? latestSession.thetaFinal != null) && (
+                  <span className="ml-2 text-xs font-semibold text-chess-text-muted">
+                    QI ≈ {latestSession.iq ?? Math.round(100 + 15 * (latestSession.thetaFinal ?? 0))}
+                  </span>
+                )}
+              </div>
               <div className="text-xs text-chess-text-muted">
                 Dernier test · {new Date(latestSession.startedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
               </div>
@@ -105,9 +112,25 @@ export default function CognitiveTestScreen() {
         </div>
 
         <div className="rounded-3xl border border-chess-border/50 bg-chess-surface p-6 flex flex-col items-center gap-4">
+          {/* QI headline */}
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-6xl font-black" style={{ color: BAND_COLORS[session.band] }}>
+              {session.iq ?? Math.round(100 + 15 * (session.thetaFinal ?? 0))}
+            </span>
+            <span className="text-sm font-semibold text-chess-text-secondary">QI indicatif</span>
+            {session.iqCI && (
+              <span className="text-xs text-chess-text-muted">
+                IC 95 % : {session.iqCI[0]}–{session.iqCI[1]}
+              </span>
+            )}
+          </div>
+
+          <div className="w-full h-px bg-chess-border/30" />
           <BandGauge band={session.band} percentile={session.percentile} />
-          <p className="text-xs text-chess-text-muted text-center max-w-[260px] leading-relaxed">
-            Basé sur {session.itemCount} questions adaptatives. Score indicatif, non clinique.
+
+          <p className="text-xs text-chess-text-muted text-center max-w-[280px] leading-relaxed">
+            Basé sur {session.itemCount} questions adaptatives · Score indicatif, non clinique.
+            Calibré sur les Sandia Matrices (Harris et al., 2020).
           </p>
         </div>
 
@@ -118,11 +141,12 @@ export default function CognitiveTestScreen() {
               {store.sessions.slice(0, 8).map((s, i) => {
                 if (!s.band || s.percentile === null) return null;
                 const c2 = BAND_COLORS[s.band];
+                const displayIQ = s.iq ?? (s.thetaFinal != null ? Math.round(100 + 15 * s.thetaFinal) : null);
                 return (
                   <div key={s.id} className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold"
+                    <div className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-[10px] font-bold"
                       style={{ borderColor: c2, color: c2 }}>
-                      {s.percentile}
+                      {displayIQ ?? s.percentile}
                     </div>
                     <div className="text-[9px] text-chess-text-muted">
                       {i === 0 ? 'Auj.' : new Date(s.startedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}

@@ -122,6 +122,20 @@ export function thetaToPercentile(theta: number): number {
   return Math.max(2, Math.min(98, Math.round(cdf * 100)));
 }
 
+// ---- QI (échelle Wechsler M=100 SD=15) ------------------------------------
+
+/** θ → QI. Calibré sur les Sandia Matrices (Harris et al., 2020). */
+export function thetaToIQ(theta: number): number {
+  return Math.round(100 + 15 * theta);
+}
+
+/** IC 95 % du QI à partir de l'erreur standard de mesure en θ. */
+export function iqConfidenceInterval(theta: number, se: number): [number, number] {
+  const iq     = thetaToIQ(theta);
+  const margin = Math.round(1.96 * 15 * se);
+  return [iq - margin, iq + margin];
+}
+
 export const BAND_LABELS: Record<CognitiveBand, string> = {
   below_average: 'En dessous de la moyenne',
   average:       'Dans la moyenne',

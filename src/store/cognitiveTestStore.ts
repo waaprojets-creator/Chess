@@ -8,6 +8,8 @@ import {
   shouldStop,
   thetaToBand,
   thetaToPercentile,
+  thetaToIQ,
+  iqConfidenceInterval,
   type ItemResponse,
 } from '@/services/catService';
 import type { CognitiveItem, CognitiveSession } from '@/types/chess';
@@ -104,6 +106,8 @@ export const useCognitiveTestStore = create<CognitiveTestState>((set, get) => ({
         thetaFinal: Math.round(newTheta * 100) / 100,
         band,
         percentile,
+        iq:   thetaToIQ(newTheta),
+        iqCI: iqConfidenceInterval(newTheta, newSe),
       };
       const newSessions = [session, ...sessions];
       saveSessions(newSessions);
@@ -140,6 +144,7 @@ export const useCognitiveTestStore = create<CognitiveTestState>((set, get) => ({
     const next = selectNextItem(thetaEstimate, COGNITIVE_ITEMS, seenIds);
     if (!next) {
       // Bank exhausted — finish
+      const se         = get().se;
       const band       = thetaToBand(thetaEstimate);
       const percentile = thetaToPercentile(thetaEstimate);
       const session: CognitiveSession = {
@@ -150,6 +155,8 @@ export const useCognitiveTestStore = create<CognitiveTestState>((set, get) => ({
         thetaFinal: Math.round(thetaEstimate * 100) / 100,
         band,
         percentile,
+        iq:   thetaToIQ(thetaEstimate),
+        iqCI: iqConfidenceInterval(thetaEstimate, se),
       };
       const newSessions = [session, ...sessions];
       saveSessions(newSessions);
