@@ -360,3 +360,34 @@ export function buildProfile(games: SavedGame[]): PlayerProfile {
     hasAnalyzedGames: hasAnalyzed,
   };
 }
+
+// ---- Cognitive context sentence -------------------------------------------
+
+import type { CognitiveSession } from '@/types/chess';
+
+export function buildCognitiveContext(
+  session: CognitiveSession,
+  profile: PlayerProfile | null
+): string | null {
+  if (!session.band || !profile) return null;
+  const resilience = profile.metrics.find((m) => m.key === 'resilience');
+  const tactical   = profile.metrics.find((m) => m.key === 'tacticalSpeed');
+  const accuracy   = profile.metrics.find((m) => m.key === 'tempoRegularity');
+
+  const gfHigh = session.band === 'high' || session.band === 'very_high';
+  const gfLow  = session.band === 'below_average' || session.band === 'average';
+
+  if (gfHigh && resilience?.available && (resilience.percentile ?? 50) < 35) {
+    return 'Capacité de raisonnement fluide élevée — vos chutes de tempo après erreur suggèrent une composante émotionnelle plutôt que cognitive.';
+  }
+  if (gfHigh && tactical?.available && (tactical.percentile ?? 50) > 65) {
+    return 'Forte fluidité — votre rapidité sur les séquences tactiques reflète probablement une bonne reconnaissance des motifs.';
+  }
+  if (gfLow && tactical?.available && (tactical.percentile ?? 50) > 65) {
+    return 'Votre vitesse tactique suggère que l\'expertise acquise compense en partie le raisonnement pur.';
+  }
+  if (gfHigh && accuracy?.available && (accuracy.percentile ?? 50) < 35) {
+    return 'Forte fluidité cognitive, mais le rythme irrégulier suggère un potentiel non encore actualisé sous contrainte.';
+  }
+  return null;
+}

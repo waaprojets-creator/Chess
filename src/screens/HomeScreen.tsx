@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { getStats, loadGames } from '@/services/gameStorageService';
 import { usePuzzleStore } from '@/store/puzzleStore';
+import { useCognitiveTestStore } from '@/store/cognitiveTestStore';
+import { BAND_LABELS } from '@/services/catService';
 
 export default function HomeScreen() {
   const navigate = useNavigate();
   const stats = getStats();
   const recentGames = loadGames().slice(0, 4);
   const puzzleRating = usePuzzleStore((s) => s.playerRating);
+  const latestCog = useCognitiveTestStore((s) => s.sessions[0]);
 
   const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
 
@@ -58,6 +61,13 @@ export default function HomeScreen() {
               ? navigate(`/analysis?gameId=${recentGames[0].id}`)
               : navigate('/history')
           }
+        />
+        <ActionCard
+          icon="🧠"
+          title="Cognitif"
+          subtitle={latestCog?.band ? BAND_LABELS[latestCog.band] : 'Testez votre Gf'}
+          accent="#1baca6"
+          onClick={() => navigate('/cognitive')}
         />
       </div>
 

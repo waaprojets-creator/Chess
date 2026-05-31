@@ -112,3 +112,44 @@ export interface EvalPoint {
   evalMate: number | null;
   color: PieceColor;
 }
+
+// ---- Cognitive test types ----
+
+export type CellShape = 'circle' | 'square' | 'triangle' | 'diamond' | 'cross' | 'none';
+export type CellFill  = 'solid' | 'outline' | 'striped';
+export type CellSize  = 'sm' | 'md' | 'lg';
+
+export interface MatrixCell {
+  shape: CellShape;
+  fill: CellFill;
+  size: CellSize;
+  rotation?: 0 | 45 | 90 | 135;
+  count?: 1 | 2 | 3;
+}
+
+export interface CognitiveItem {
+  id: string;
+  // 3×3 grid; position [2][2] is the missing cell (rendered as '?')
+  grid: (MatrixCell | null)[][];
+  options: MatrixCell[]; // 5 choices
+  correctIndex: number;
+  irt: { a: number; b: number; c: number };
+  domain: 'Gf' | 'Gv';
+}
+
+export type CognitiveBand =
+  | 'below_average'
+  | 'average'
+  | 'above_average'
+  | 'high'
+  | 'very_high';
+
+export interface CognitiveSession {
+  id: string;
+  startedAt: number;
+  completedAt: number | null;
+  itemCount: number;
+  thetaFinal: number | null;
+  band: CognitiveBand | null;
+  percentile: number | null;
+}

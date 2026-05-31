@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadGames } from '@/services/gameStorageService';
-import { buildProfile, type DecisionMetric } from '@/services/psychProfileService';
+import { buildProfile, buildCognitiveContext, type DecisionMetric } from '@/services/psychProfileService';
+import { useCognitiveTestStore } from '@/store/cognitiveTestStore';
+import { BAND_LABELS, BAND_COLORS } from '@/services/catService';
 import { Button } from '@/components/ui/Button';
 
 function trendIcon(trend: number | null): { icon: string; color: string } | null {
@@ -56,6 +58,9 @@ function MetricCard({ metric }: { metric: DecisionMetric }) {
 export default function ProfileScreen() {
   const navigate = useNavigate();
   const profile = useMemo(() => buildProfile(loadGames()), []);
+  const cogSessions = useCognitiveTestStore((s) => s.sessions);
+  const latestCog = cogSessions[0] ?? null;
+  const cogContext = buildCognitiveContext(latestCog!, profile) ?? null;
 
   const hasData = profile.gamesUsed > 0 && profile.metrics.some((m) => m.available);
 
@@ -69,6 +74,46 @@ export default function ProfileScreen() {
           Parties
         </Button>
       </div>
+
+      {/* Cognitive section */}
+      {latestCog?.band && latestCog.percentile !== null ? (
+        <div className="rounded-2xl border border-chess-border/50 bg-chess-surface p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-chess-text-secondary">Cognition (Gf)</span>
+            <Button size="sm" variant="ghost" onClick={() => navigate('/cognitive')}>Retester</Button>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative w-12 h-12 shrink-0">
+              <svg viewBox="0 0 40 40" className="w-full h-full -rotate-90">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+                <circle cx="20" cy="20" r="16" fill="none"
+                  stroke={BAND_COLORS[latestCog.band]}
+                  strokeWidth="4" strokeLinecap="round"
+                  strokeDasharray={`${(latestCog.percentile / 100) * 100.53} 100.53`}
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black"
+                style={{ color: BAND_COLORS[latestCog.band] }}>
+                {latestCog.percentile}ᵉ
+              </span>
+            </div>
+            <div>
+              <div className="text-sm font-bold text-chess-text-primary">{BAND_LABELS[latestCog.band]}</div>
+              {cogContext && (
+                <p className="text-xs text-chess-text-muted mt-0.5 leading-relaxed">{cogContext}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => navigate('/cognitive')}
+          className="w-full rounded-2xl border border-dashed border-chess-border/60 bg-chess-surface/40 px-4 py-4 text-left hover:border-chess-accent/40 transition-colors"
+        >
+          <div className="text-sm font-semibold text-chess-text-secondary">🧠 Tester votre raisonnement fluide</div>
+          <div className="text-xs text-chess-text-muted mt-0.5">Test adaptatif · ~5 min · Matrices progressives</div>
+        </button>
+      )}
 
       {!hasData ? (
         <div className="mt-6 flex flex-col items-center gap-4 rounded-3xl border border-dashed border-chess-border bg-chess-surface/40 px-6 py-14 text-center text-chess-text-muted">
