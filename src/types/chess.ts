@@ -123,7 +123,7 @@ export interface MatrixCell {
   shape: CellShape;
   fill: CellFill;
   size: CellSize;
-  rotation?: 0 | 45 | 90 | 135;
+  rotation?: 0 | 45 | 90 | 135 | 180;
   count?: 1 | 2 | 3;
 }
 

@@ -50,13 +50,13 @@ const ITEM_03: CognitiveItem = {
 
 const ITEM_04: CognitiveItem = {
   id: 'cog_04', domain: 'Gv', irt: { a: 1.1, b: -1.2, c: 0.2 },
-  // Rule: rotation progresses per column (0°→90°→135°), all triangles solid md
+  // Rule: rotation progresses per column (0°→90°→180°), all triangles solid md
   grid: [
-    [t('md','solid',0),  t('md','solid',90),  t('md','solid',135)],
-    [t('md','solid',0),  t('md','solid',90),  t('md','solid',135)],
-    [t('md','solid',0),  t('md','solid',90),  null],
+    [t('md','solid',0),   t('md','solid',90),  t('md','solid',180)],
+    [t('md','solid',0),   t('md','solid',90),  t('md','solid',180)],
+    [t('md','solid',0),   t('md','solid',90),  null],
   ],
-  options: [t('md','solid',135), t('md','solid',0), t('md','solid',90), c('md','solid',135), s('md','solid',135)],
+  options: [t('md','solid',180), t('md','solid',0), t('md','solid',90), c('md','solid'), s('md','solid')],
   correctIndex: 0,
 };
 
@@ -130,13 +130,13 @@ const ITEM_09: CognitiveItem = {
 
 const ITEM_10: CognitiveItem = {
   id: 'cog_10', domain: 'Gv', irt: { a: 1.3, b: -0.1, c: 0.2 },
-  // Rules: rotation per row (0°/90°/135°) AND size per column (sm/md/lg), all triangles solid
+  // Rules: rotation per row (0°/90°/180°) AND size per column (sm/md/lg), all triangles solid
   grid: [
     [t('sm','solid',0),   t('md','solid',0),   t('lg','solid',0)],
     [t('sm','solid',90),  t('md','solid',90),  t('lg','solid',90)],
-    [t('sm','solid',135), t('md','solid',135), null],
+    [t('sm','solid',180), t('md','solid',180), null],
   ],
-  options: [t('lg','solid',135), t('sm','solid',135), t('md','solid',135), c('lg','solid',135), t('lg','solid',90)],
+  options: [t('lg','solid',180), t('sm','solid',180), t('md','solid',180), c('lg','solid'), t('lg','solid',90)],
   correctIndex: 0,
 };
 
@@ -171,20 +171,14 @@ const ITEM_12: CognitiveItem = {
 };
 
 const ITEM_13: CognitiveItem = {
-  id: 'cog_13', domain: 'Gv', irt: { a: 1.4, b: 0.2, c: 0.2 },
-  // Rules: rotation per column (0°/45°/90°) AND fill per row (solid/outline/striped), all diamonds md
+  id: 'cog_13', domain: 'Gf', irt: { a: 1.4, b: 0.2, c: 0.2 },
+  // Rules: fill per row (solid/outline/striped) AND size per column (sm/md/lg), all diamonds
   grid: [
-    [d('md','solid',0),   d('md','solid',45),   d('md','solid',90)],
-    [d('md','outline',0), d('md','outline',45), d('md','outline',90)],
-    [d('md','striped',0), d('md','striped',45), null],
+    [d('sm','solid'),   d('md','solid'),   d('lg','solid')],
+    [d('sm','outline'), d('md','outline'), d('lg','outline')],
+    [d('sm','striped'), d('md','striped'), null],
   ],
-  options: [
-    d('md','striped',90),
-    d('md','striped',45),
-    d('md','striped',0),
-    c('md','striped',90),
-    d('md','outline',90),
-  ],
+  options: [d('lg','striped'), d('sm','striped'), d('md','striped'), c('lg','striped'), d('lg','outline')],
   correctIndex: 0,
 };
 
@@ -219,19 +213,19 @@ const ITEM_15: CognitiveItem = {
 };
 
 const ITEM_16: CognitiveItem = {
-  id: 'cog_16', domain: 'Gv', irt: { a: 1.5, b: 0.4, c: 0.2 },
-  // Rules: rotation per row AND count per column, all circles solid md
+  id: 'cog_16', domain: 'Gf', irt: { a: 1.5, b: 0.4, c: 0.2 },
+  // Rules: fill per column (solid/outline/striped) AND count per row (1/2/3), all squares md
   grid: [
-    [c('md','solid',0,1),   c('md','solid',0,2),   c('md','solid',0,3)],
-    [c('md','solid',90,1),  c('md','solid',90,2),  c('md','solid',90,3)],
-    [c('md','solid',135,1), c('md','solid',135,2), null],
+    [s('md','solid',undefined,1), s('md','outline',undefined,1), s('md','striped',undefined,1)],
+    [s('md','solid',undefined,2), s('md','outline',undefined,2), s('md','striped',undefined,2)],
+    [s('md','solid',undefined,3), s('md','outline',undefined,3), null],
   ],
   options: [
-    c('md','solid',135,3),
-    c('md','solid',135,1),
-    c('md','solid',90,3),
-    s('md','solid',135,3),
-    c('md','solid',135,2),
+    s('md','striped',undefined,3),
+    s('md','striped',undefined,1),
+    s('md','solid',undefined,3),
+    c('md','striped',undefined,3),
+    s('md','striped',undefined,2),
   ],
   correctIndex: 0,
 };
@@ -325,7 +319,7 @@ const ITEM_22: CognitiveItem = {
   options: [
     t('md','striped',90),
     t('md','solid',90),
-    t('md','striped',45),
+    t('md','striped',180),
     c('md','striped',90),
     t('md','striped',0),
   ],
