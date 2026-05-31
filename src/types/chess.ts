@@ -115,24 +115,11 @@ export interface EvalPoint {
 
 // ---- Cognitive test types ----
 
-export type CellShape = 'circle' | 'square' | 'triangle' | 'diamond' | 'cross' | 'none';
-export type CellFill  = 'solid' | 'outline' | 'striped';
-export type CellSize  = 'sm' | 'md' | 'lg';
-
-export interface MatrixCell {
-  shape: CellShape;
-  fill: CellFill;
-  size: CellSize;
-  rotation?: 0 | 45 | 90 | 135 | 180;
-  count?: 1 | 2 | 3;
-}
-
 export interface CognitiveItem {
   id: string;
-  // 3×3 grid; position [2][2] is the missing cell (rendered as '?')
-  grid: (MatrixCell | null)[][];
-  options: MatrixCell[]; // 5 choices
-  correctIndex: number;
+  gridImage: string;       // path to 308×308 PNG (e.g. '/Chess/cognitive/grids/A1_1.png')
+  optionImages: string[];  // 8 option PNG paths (102×103 each)
+  correctIndex: number;    // 0-based index into optionImages
   irt: { a: number; b: number; c: number };
   domain: 'Gf' | 'Gv';
 }
