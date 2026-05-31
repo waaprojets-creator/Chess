@@ -308,20 +308,21 @@ const ITEM_21: CognitiveItem = {
 };
 
 const ITEM_22: CognitiveItem = {
-  id: 'cog_22', domain: 'Gv', irt: { a: 1.7, b: 1.2, c: 0.2 },
-  // Shape per row + fill per row + rotation per column, all md
-  // R1: circles solid, rot 0,45,90 · R2: squares outline, rot 0,45,90 · R3: triangles striped, rot 0,45,?=90
+  id: 'cog_22', domain: 'Gf', irt: { a: 1.7, b: 1.2, c: 0.2 },
+  // 3 rules: shape+size per row, fill per column
+  // R1: circles sm · R2: squares md · R3: triangles lg
+  // Col1: solid · Col2: outline · Col3: striped
   grid: [
-    [c('md','solid',0),    c('md','solid',45),    c('md','solid',90)],
-    [s('md','outline',0),  s('md','outline',45),  s('md','outline',90)],
-    [t('md','striped',0),  t('md','striped',45),  null],
+    [c('sm','solid'),  c('sm','outline'), c('sm','striped')],
+    [s('md','solid'),  s('md','outline'), s('md','striped')],
+    [t('lg','solid'),  t('lg','outline'), null],
   ],
   options: [
-    t('md','striped',90),
-    t('md','solid',90),
-    t('md','striped',180),
-    c('md','striped',90),
-    t('md','striped',0),
+    t('lg','striped'),
+    t('sm','striped'),
+    t('lg','solid'),
+    c('lg','striped'),
+    s('lg','striped'),
   ],
   correctIndex: 0,
 };
