@@ -65,6 +65,10 @@ html, body {
 /* Move list scrollable */
 .move-list { scrollbar-width: thin; scrollbar-color: #3d3a37 transparent; }
 
+/* Hide scrollbar visually but keep scroll behavior */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* Range slider (ELO) */
 input[type='range'].range-accent {
   -webkit-appearance: none;

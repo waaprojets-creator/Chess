@@ -27,7 +27,7 @@ export default defineConfig({
       manifest: false,
       injectRegister: 'auto',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,webmanifest,wasm}'],
         maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
         runtimeCaching: [
           {
@@ -48,6 +48,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-chess':  ['chess.js', 'react-chessboard'],
+          'vendor-charts': ['recharts'],
+          'vendor-state':  ['zustand'],
+        },
+      },
+    },
   },
   optimizeDeps: {
     exclude: ['stockfish'],

@@ -9,6 +9,7 @@ import type {
   GameResult,
   GameEndReason,
   Arrow,
+  EngineMode,
 } from '@/types/chess';
 
 interface GameStore extends GameState {
@@ -18,7 +19,7 @@ interface GameStore extends GameState {
   selectedSquare: string | null;
   arrowOverlays: Arrow[];
 
-  startGame: (playerColor: PieceColor, botElo: number, tc: TimeControl) => void;
+  startGame: (playerColor: PieceColor, botElo: number, tc: TimeControl, vsHuman?: boolean, engineMode?: EngineMode, excludeFromProfile?: boolean) => void;
   makeMove: (from: string, to: string, promotion?: string) => boolean;
   addMoveRecord: (record: MoveRecord) => void;
   tickClock: () => void;
@@ -45,6 +46,9 @@ const INITIAL: Omit<GameState, 'id' | 'startedAt'> = {
   blackTimeMs: 600_000,
   endedAt: null,
   boardFlipped: false,
+  vsHuman: false,
+  engineMode: 'stockfish',
+  excludeFromProfile: false,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -57,7 +61,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedSquare: null,
   arrowOverlays: [],
 
-  startGame(playerColor, botElo, tc) {
+  startGame(playerColor, botElo, tc, vsHuman = false, engineMode = 'stockfish', excludeFromProfile = false) {
     const chess = new Chess();
     set({
       id: nanoid(),
@@ -75,6 +79,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       startedAt: Date.now(),
       endedAt: null,
       boardFlipped: playerColor === 'b',
+      vsHuman,
+      engineMode,
+      excludeFromProfile,
       chess,
       liveEvalCp: null,
       liveEvalMate: null,

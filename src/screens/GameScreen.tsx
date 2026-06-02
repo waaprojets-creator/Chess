@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { useGameStore } from '@/store/gameStore';
-import { getStockfishService } from '@/services/stockfishService';
+import { getStockfishService, destroyStockfishService } from '@/services/stockfishService';
 import { getBotProfile } from '@/constants/elo';
 import { saveGame } from '@/services/gameStorageService';
 import { ChessBoard } from '@/components/board/ChessBoard';
@@ -14,14 +14,22 @@ import { GameControls } from '@/components/game/GameControls';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useChessClock } from '@/hooks/useChessClock';
+import { useSounds } from '@/hooks/useSounds';
+import { SettingsModal } from '@/components/ui/SettingsModal';
 import type { MoveRecord, SavedGame } from '@/types/chess';
 
 export default function GameScreen() {
   const navigate = useNavigate();
   const store = useGameStore();
   const isThinkingRef = useRef(false);
+  // Timestamp marking when the side to move started thinking. Reset after every
+  // recorded move (player or bot) so each player move's timeTakenMs reflects real
+  // deliberation time — the basis for the decisional profile.
+  const moveStartRef = useRef<number>(Date.now());
   const [showEndModal, setShowEndModal] = useState(false);
   const [boardWidth, setBoardWidth] = useState(360);
+  const { play } = useSounds();
+  const [showSettings, setShowSettings] = useState(false);
 
   useChessClock();
 
@@ -45,6 +53,11 @@ export default function GameScreen() {
     }
   }, [store.phase]);
 
+  // Start the deliberation clock when the game begins
+  useEffect(() => {
+    if (store.phase === 'playing') moveStartRef.current = Date.now();
+  }, [store.phase]);
+
   const persistGame = useCallback(() => {
     const s = useGameStore.getState();
     if (!s.id || !s.endedAt) return;
@@ -60,6 +73,7 @@ export default function GameScreen() {
       startedAt: s.startedAt,
       endedAt: s.endedAt,
       analyzed: false,
+      excludeFromProfile: s.excludeFromProfile,
     };
     saveGame(saved);
   }, []);
@@ -69,7 +83,7 @@ export default function GameScreen() {
     (from: string, to: string, promotion = 'q'): boolean => {
       const s = useGameStore.getState();
       if (s.phase !== 'playing') return false;
-      if (s.turn !== s.playerColor) return false;
+      if (!s.vsHuman && s.turn !== s.playerColor) return false;
       if (isThinkingRef.current) return false;
 
       const ok = store.makeMove(from, to, promotion);
@@ -84,25 +98,33 @@ export default function GameScreen() {
 
       const record: MoveRecord = {
         san: lastMove.san,
-        uci: from + to + (promotion !== 'q' ? promotion : ''),
+        uci: from + to + (lastMove.promotion ?? ''),
         fen: chess.fen(),
         evalCp: null,
         evalMate: null,
         classification: null,
         bestMoveSan: null,
         bestMoveUci: null,
-        timeTakenMs: 0,
+        timeTakenMs: Date.now() - moveStartRef.current,
         moveNumber: Math.ceil(history.length / 2),
         color: lastMove.color,
       };
       store.addMoveRecord(record);
+      moveStartRef.current = Date.now();
+
+      // Sound feedback
+      if (chess.inCheck()) play('check');
+      else if (lastMove.captured) play('capture');
+      else play('move');
 
       // Check game end
       if (chess.isCheckmate()) {
+        play('end');
         store.endGame(state.turn === 'w' ? 'black' : 'white', 'checkmate');
         return true;
       }
       if (chess.isDraw()) {
+        play('end');
         const reason = chess.isStalemate() ? 'stalemate'
           : chess.isInsufficientMaterial() ? 'insufficient_material'
           : 'fifty_moves';
@@ -110,16 +132,23 @@ export default function GameScreen() {
         return true;
       }
 
+      // In local multiplayer: flip the board so the next player sees their side
+      if (s.vsHuman) {
+        store.flipBoard();
+        return true;
+      }
+
       // Bot move
       triggerBotMove();
       return true;
     },
-    [store]
+    [store, play]
   );
 
   const triggerBotMove = useCallback(async () => {
     const s = useGameStore.getState();
     if (s.phase !== 'playing') return;
+    if (s.vsHuman) return;
     if (isThinkingRef.current) return;
     isThinkingRef.current = true;
 
@@ -129,13 +158,11 @@ export default function GameScreen() {
 
       const profile = getBotProfile(s.botElo);
       const uciMoves = s.moves.map((m) => m.uci);
+      const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-      const result = await sf.getBestMove(
-        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-        uciMoves,
-        profile.movetime,
-        profile.depth ?? undefined
-      );
+      const result = s.engineMode === 'human'
+        ? await sf.getHumanMove(START, uciMoves, profile)
+        : await sf.getBestMove(START, uciMoves, profile.movetime, profile.depth ?? undefined);
 
       // Update live eval
       if (result.score) {
@@ -174,22 +201,31 @@ export default function GameScreen() {
         color: botLastMove.color,
       };
       useGameStore.getState().addMoveRecord(botRecord);
+      // Player's clock starts now that the board is theirs again
+      moveStartRef.current = Date.now();
+
+      if (chess2.inCheck()) play('check');
+      else if (botLastMove.captured) play('capture');
+      else play('move');
 
       if (chess2.isCheckmate()) {
+        play('end');
         useGameStore.getState().endGame(newState.turn === 'w' ? 'black' : 'white', 'checkmate');
       } else if (chess2.isDraw()) {
+        play('end');
         const reason = chess2.isStalemate() ? 'stalemate' : 'fifty_moves';
         useGameStore.getState().endGame('draw', reason);
       }
     } finally {
       isThinkingRef.current = false;
     }
-  }, []);
+  }, [play]);
 
   // Init stockfish when the game starts; if the bot is to move first
   // (player chose Black), kick off its opening move.
   useEffect(() => {
     if (store.phase !== 'playing') return;
+    if (store.vsHuman) return;
     const sf = getStockfishService();
     sf.waitReady().then(() => {
       const profile = getBotProfile(store.botElo);
@@ -200,7 +236,12 @@ export default function GameScreen() {
         triggerBotMove();
       }
     });
-  }, [store.phase, store.botElo, triggerBotMove]);
+  }, [store.phase, store.botElo, store.vsHuman, triggerBotMove]);
+
+  // Terminate Stockfish when leaving the game screen
+  useEffect(() => {
+    return () => { destroyStockfishService(); };
+  }, []);
 
   // Redirect if no game
   useEffect(() => {
@@ -232,14 +273,16 @@ export default function GameScreen() {
 
   const endResultText = () => {
     if (!store.result) return 'Partie terminée';
-    const playerWon = (store.result === 'white' && store.playerColor === 'w') || (store.result === 'black' && store.playerColor === 'b');
     const isDraw = store.result === 'draw';
     if (isDraw) return 'Nulle !';
+    if (store.vsHuman) return store.result === 'white' ? 'Les Blancs gagnent !' : 'Les Noirs gagnent !';
+    const playerWon = (store.result === 'white' && store.playerColor === 'w') || (store.result === 'black' && store.playerColor === 'b');
     return playerWon ? 'Vous avez gagné !' : 'Vous avez perdu';
   };
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#161513] pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
       {/* Sidebar layout on desktop, stacked on mobile */}
       <div className="flex flex-1 overflow-hidden">
         {/* Board area */}
@@ -247,9 +290,9 @@ export default function GameScreen() {
           {/* Opponent info */}
           <div className="flex w-full max-w-[440px] items-center justify-between rounded-2xl border border-chess-border/50 bg-surface-gradient px-3 py-1.5">
             <PlayerCard
-              name={`Bot ${store.botElo}`}
-              elo={store.botElo}
-              isBot
+              name={store.vsHuman ? 'Joueur 2' : `Bot ${store.botElo}`}
+              elo={store.vsHuman ? 0 : store.botElo}
+              isBot={!store.vsHuman}
               isActive={store.turn === opponentColor && store.phase === 'playing'}
             />
             <ChessClock
@@ -270,7 +313,7 @@ export default function GameScreen() {
               fen={store.fen}
               onMove={handleMove}
               boardFlipped={store.boardFlipped}
-              interactive={store.phase === 'playing' && store.turn === store.playerColor}
+              interactive={store.phase === 'playing' && (store.vsHuman || store.turn === store.playerColor)}
               lastMoveSquares={lastMoveSquares}
               kingCheckSquare={kingCheckSquare}
               width={boardWidth - 28}
@@ -307,9 +350,16 @@ export default function GameScreen() {
         </div>
       </div>
 
-      {/* Mobile move list bar */}
-      <div className="md:hidden h-12 glass border-t border-chess-border flex items-center gap-2 px-3">
+      {/* Mobile move list bar — fixed height, horizontal scroll */}
+      <div className="md:hidden h-12 glass border-t border-chess-border flex items-center gap-2 px-2 shrink-0">
         <MoveList moves={store.moves} compact />
+        <button
+          onClick={() => setShowSettings(true)}
+          className="shrink-0 w-7 h-7 flex items-center justify-center rounded text-chess-text-muted hover:text-chess-text-primary"
+          title="Paramètres"
+        >
+          ⚙
+        </button>
         <GameControls
           phase={store.phase}
           onResign={store.resign}

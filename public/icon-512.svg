@@ -1,4 +1,67 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'>
-  <rect width='512' height='512' rx='76.8' fill='#262421'/>
-  <text x='256' y='394.24' font-size='332.8' text-anchor='middle' font-family='serif' fill='#769656'>♟</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="clip"><rect width="512" height="512" rx="96"/></clipPath>
+    <radialGradient id="vignette" cx="50%" cy="45%" r="58%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.33)"/>
+    </radialGradient>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Chess board 2×2 -->
+    <rect x="0"   y="0"   width="256" height="256" fill="#f0d9b5"/>
+    <rect x="256" y="0"   width="256" height="256" fill="#769656"/>
+    <rect x="0"   y="256" width="256" height="256" fill="#769656"/>
+    <rect x="256" y="256" width="256" height="256" fill="#f0d9b5"/>
+
+    <!-- Vignette + dark scrim -->
+    <rect width="512" height="512" fill="url(#vignette)"/>
+    <rect width="512" height="512" fill="rgba(18,15,12,0.29)"/>
+
+    <!--
+      Étoile islamique à 8 branches — union de deux carrés superposés (l'un droit,
+      l'autre tourné 45°), circumrayon R=190, centrés en (256,256).
+
+      Carré 1 (losange) : sommets (256,66) (446,256) (256,446) (66,256)
+        côtés : x−y=190 | x+y=702 | x−y=−190 | x+y=322
+      Carré 2 (axe-aligné) : sommets (390.4,121.6) (390.4,390.4) (121.6,390.4) (121.6,121.6)
+        côtés : y=121.6 | x=390.4 | y=390.4 | x=121.6
+
+      16 sommets du polygone union (8 coins + 8 intersections) :
+    -->
+    <polygon
+      points="
+        256,47
+        317.2,108.2
+        403.8,108.2
+        403.8,194.8
+        465,256
+        403.8,317.2
+        403.8,403.8
+        317.2,403.8
+        256,465
+        194.8,403.8
+        108.2,403.8
+        108.2,317.2
+        47,256
+        108.2,194.8
+        108.2,108.2
+        194.8,108.2
+      "
+      fill="rgba(255,255,255,0.07)"
+      stroke="#ffffff"
+      stroke-width="4"
+      stroke-linejoin="miter"
+      opacity="0.60"
+    />
+
+    <!-- Arabic calligraphy : شطرنج — élément principal -->
+    <text x="256" y="259" font-size="126" text-anchor="middle"
+          font-family="'Amiri','Scheherazade New','Traditional Arabic','Arabic Typesetting',serif"
+          fill="#ffffff" opacity="0.97">&#x634;&#x637;&#x631;&#x646;&#x62C;</text>
+  </g>
+
+  <!-- Gold inner border -->
+  <rect width="512" height="512" rx="96" fill="none"
+        stroke="rgba(201,168,76,0.18)" stroke-width="6"/>
 </svg>

@@ -24,6 +24,7 @@ interface PuzzleStore {
   submitMove: (uci: string) => 'correct_step' | 'solved' | 'wrong' | 'ignore';
   giveUp: () => void;
   nextPuzzle: () => void;
+  retryPuzzle: () => void;
 }
 
 const PUZZLE_RATING_KEY = 'chess:puzzle_rating';
@@ -187,6 +188,11 @@ export const usePuzzleStore = create<PuzzleStore>((set, get) => ({
 
   nextPuzzle() {
     set((s) => ({ currentIndex: s.currentIndex + 1 }));
+    get().loadNextPuzzle();
+  },
+
+  retryPuzzle() {
+    // Reload the same puzzle index without rating impact (already deducted on failure)
     get().loadNextPuzzle();
   },
 }));

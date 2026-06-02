@@ -1,5 +1,7 @@
 export type PieceColor = 'w' | 'b';
 
+export type EngineMode = 'stockfish' | 'human';
+
 export interface TimeControl {
   minutes: number;
   increment: number;
@@ -67,6 +69,14 @@ export interface GameState {
   startedAt: number;
   endedAt: number | null;
   boardFlipped: boolean;
+  vsHuman: boolean;
+  engineMode: EngineMode;
+  excludeFromProfile: boolean;
+}
+
+export interface MoveNode {
+  record: MoveRecord;
+  children: MoveNode[];
 }
 
 export interface SavedGame {
@@ -81,6 +91,9 @@ export interface SavedGame {
   startedAt: number;
   endedAt: number | null;
   analyzed: boolean;
+  deepAnalyzed?: boolean;
+  accuracy?: { white: number; black: number };
+  excludeFromProfile?: boolean;
 }
 
 export interface PuzzleEntry {
@@ -98,4 +111,34 @@ export interface EvalPoint {
   evalCp: number | null;
   evalMate: number | null;
   color: PieceColor;
+}
+
+// ---- Cognitive test types ----
+
+export interface CognitiveItem {
+  id: string;
+  gridImage: string;       // path to 308×308 PNG (e.g. '/Chess/cognitive/grids/A1_1.png')
+  optionImages: string[];  // 8 option PNG paths (102×103 each)
+  correctIndex: number;    // 0-based index into optionImages
+  irt: { a: number; b: number; c: number };
+  domain: 'Gf' | 'Gv';
+}
+
+export type CognitiveBand =
+  | 'below_average'
+  | 'average'
+  | 'above_average'
+  | 'high'
+  | 'very_high';
+
+export interface CognitiveSession {
+  id: string;
+  startedAt: number;
+  completedAt: number | null;
+  itemCount: number;
+  thetaFinal: number | null;
+  band: CognitiveBand | null;
+  percentile: number | null;
+  iq: number | null;
+  iqCI: [number, number] | null;
 }
