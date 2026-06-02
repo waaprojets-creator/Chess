@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { useGameStore } from '@/store/gameStore';
-import { getStockfishService } from '@/services/stockfishService';
+import { getStockfishService, destroyStockfishService } from '@/services/stockfishService';
 import { getBotProfile } from '@/constants/elo';
 import { saveGame } from '@/services/gameStorageService';
 import { ChessBoard } from '@/components/board/ChessBoard';
@@ -237,6 +237,11 @@ export default function GameScreen() {
       }
     });
   }, [store.phase, store.botElo, store.vsHuman, triggerBotMove]);
+
+  // Terminate Stockfish when leaving the game screen
+  useEffect(() => {
+    return () => { destroyStockfishService(); };
+  }, []);
 
   // Redirect if no game
   useEffect(() => {

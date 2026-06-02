@@ -48,6 +48,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-chess':  ['chess.js', 'react-chessboard'],
+          'vendor-charts': ['recharts'],
+          'vendor-state':  ['zustand'],
+        },
+      },
+    },
   },
   optimizeDeps: {
     exclude: ['stockfish'],

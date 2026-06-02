@@ -78,6 +78,7 @@ function splitMultiPgn(text: string): string[] {
 }
 
 export async function fetchLichessGames(username: string): Promise<SavedGame[]> {
+  if (!navigator.onLine) throw new Error('Pas de connexion réseau. Vérifiez votre connexion et réessayez.');
   const res = await fetch(
     `https://lichess.org/api/games/user/${encodeURIComponent(username)}?max=5&moves=true&pgnInJson=true`,
     { headers: { Accept: 'application/x-ndjson' } }
@@ -103,6 +104,7 @@ export async function fetchLichessGames(username: string): Promise<SavedGame[]> 
 }
 
 export async function fetchChessComGames(username: string): Promise<SavedGame[]> {
+  if (!navigator.onLine) throw new Error('Pas de connexion réseau. Vérifiez votre connexion et réessayez.');
   // Get monthly archive list
   const archRes = await fetch(
     `https://api.chess.com/pub/player/${encodeURIComponent(username)}/games/archives`

@@ -1,14 +1,17 @@
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomeScreen from '@/screens/HomeScreen';
 import PlaySetupScreen from '@/screens/PlaySetupScreen';
-import GameScreen from '@/screens/GameScreen';
-import AnalysisScreen from '@/screens/AnalysisScreen';
-import PuzzlesScreen from '@/screens/PuzzlesScreen';
-import HistoryScreen from '@/screens/HistoryScreen';
-import ProfileScreen from '@/screens/ProfileScreen';
-import CognitiveTestScreen from '@/screens/CognitiveTestScreen';
 import NavBar from '@/components/ui/NavBar';
+import { PageLoader } from '@/components/ui/PageLoader';
 import { useAnalysisStore } from '@/store/analysisStore';
+
+const GameScreen          = lazy(() => import('@/screens/GameScreen'));
+const AnalysisScreen      = lazy(() => import('@/screens/AnalysisScreen'));
+const PuzzlesScreen       = lazy(() => import('@/screens/PuzzlesScreen'));
+const HistoryScreen       = lazy(() => import('@/screens/HistoryScreen'));
+const ProfileScreen       = lazy(() => import('@/screens/ProfileScreen'));
+const CognitiveTestScreen = lazy(() => import('@/screens/CognitiveTestScreen'));
 
 function DeepAnalysisBar() {
   const { isDeepAnalyzing, deepAnalysisProgress, cancelDeepAnalysis } = useAnalysisStore();
@@ -34,23 +37,43 @@ function DeepAnalysisBar() {
   );
 }
 
+function OfflineBanner() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const on  = () => setIsOnline(true);
+    const off = () => setIsOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
+  }, []);
+  if (isOnline) return null;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-chess-blunder/90 px-4 py-1.5 text-center text-xs font-medium text-white">
+      Hors ligne — Les fonctionnalités réseau sont indisponibles
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <HashRouter>
+      <OfflineBanner />
       <DeepAnalysisBar />
       <div className="flex flex-col min-h-dvh app-bg text-chess-text-primary">
         <div className="flex-1 nav-pad">
-          <Routes>
-            <Route path="/" element={<HomeScreen />} />
-            <Route path="/play" element={<PlaySetupScreen />} />
-            <Route path="/game" element={<GameScreen />} />
-            <Route path="/analysis" element={<AnalysisScreen />} />
-            <Route path="/puzzles" element={<PuzzlesScreen />} />
-            <Route path="/history" element={<HistoryScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/cognitive" element={<CognitiveTestScreen />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomeScreen />} />
+              <Route path="/play" element={<PlaySetupScreen />} />
+              <Route path="/game" element={<GameScreen />} />
+              <Route path="/analysis" element={<AnalysisScreen />} />
+              <Route path="/puzzles" element={<PuzzlesScreen />} />
+              <Route path="/history" element={<HistoryScreen />} />
+              <Route path="/profile" element={<ProfileScreen />} />
+              <Route path="/cognitive" element={<CognitiveTestScreen />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </div>
         <NavBar />
       </div>

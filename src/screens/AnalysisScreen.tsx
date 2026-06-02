@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAnalysisStore, flattenMainLine } from '@/store/analysisStore';
+import { destroyStockfishService } from '@/services/stockfishService';
 import { getGameById } from '@/services/gameStorageService';
 import { ChessBoard } from '@/components/board/ChessBoard';
 import { EvalBar } from '@/components/board/EvalBar';
@@ -45,6 +46,14 @@ export default function AnalysisScreen() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [store]);
+
+  // Stop any running analysis and terminate the Worker when leaving
+  useEffect(() => {
+    return () => {
+      store.cancelDeepAnalysis();
+      destroyStockfishService();
+    };
+  }, []);
 
   const currentNode = store.currentPath.length > 0
     ? (() => {
