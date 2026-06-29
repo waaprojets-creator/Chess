@@ -42,8 +42,18 @@ export async function analyzeGame(
     );
 
     const score = result.score;
-    const evalCp = score?.type === 'cp' ? score.value : null;
-    const evalMate = score?.type === 'mate' ? score.value : null;
+    const rawCp = score?.type === 'cp' ? score.value : null;
+    const rawMate = score?.type === 'mate' ? score.value : null;
+
+    // Stockfish reports the score from the side-to-move's perspective (UCI
+    // convention). After applying `uciMoves` plies, the side to move is White
+    // when an even number of half-moves have been played. Normalise everything
+    // to White's perspective so the eval bar, graph and cp-loss are consistent.
+    const sideToMoveIsWhite = uciMoves.length % 2 === 0;
+    const sign = sideToMoveIsWhite ? 1 : -1;
+
+    const evalCp = rawCp !== null ? rawCp * sign : null;
+    const evalMate = rawMate !== null ? rawMate * sign : null;
     const evalCpWhite =
       evalCp !== null
         ? evalCp
@@ -53,7 +63,7 @@ export async function analyzeGame(
           : -15000
         : 0;
 
-    // cp loss from moving player's perspective
+    // cp loss from moving player's perspective (in centipawns)
     const movingColor: PieceColor = move.color;
     const prevFromSide = movingColor === 'w' ? prevEvalCpWhite : -prevEvalCpWhite;
     const afterFromSide = movingColor === 'w' ? evalCpWhite : -evalCpWhite;
@@ -81,8 +91,8 @@ export async function analyzeGame(
     } catch {}
 
     const classification = classifyMove(
-      prevFromSide / 100,
-      afterFromSide / 100,
+      prevFromSide,
+      afterFromSide,
       move.uci,
       bestUci
     );
